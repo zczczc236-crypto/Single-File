@@ -3,525 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>Mythic Overlord: Ultimate</title>
+    <title>Mythic Overlord: Final</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+KR:wght@300;700&display=swap');
-        
         :root {
-            --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #050508;
-            --gold: #ffd700; --dia: #00d2ff; --panel: rgba(255, 255, 255, 0.08);
-            --border: #333;
+            --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #0a0a12;
+            --gold: #ffd700; --dia: #00d2ff; --panel: rgba(255, 255, 255, 0.05);
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans KR', sans-serif; }
-        body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: #eee; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
         
-        #app { width: 100%; max-width: 480px; height: 100%; background: radial-gradient(circle at top, #1a1a2e 0%, #050508 100%); display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        #app { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; position: relative; border-left: 1px solid #333; border-right: 1px solid #333; background: #000; }
 
-        /* Top Bar */
-        .header { padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(0,0,0,0.95); border-bottom: 2px solid #444; z-index: 100; }
-        .stat-box { background: var(--panel); padding: 6px; border-radius: 8px; text-align: center; border: 1px solid #444; }
-        .stat-box div { font-size: 9px; color: #888; font-family: 'Orbitron'; margin-bottom: 2px; }
-        .stat-box span { font-size: 12px; font-weight: bold; font-family: 'Orbitron'; }
+        /* Status Bar */
+        .header { padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #111; border-bottom: 2px solid #444; }
+        .stat-box { background: var(--panel); padding: 5px; border-radius: 8px; text-align: center; border: 1px solid #222; }
+        .stat-box small { font-size: 9px; color: #888; display: block; }
+        .stat-box span { font-size: 13px; font-weight: bold; color: #fff; }
 
-        /* Content Area */
-        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; scrollbar-width: none; }
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
         .main-content::-webkit-scrollbar { display: none; }
 
-        /* Battle View */
-        .stage-card { background: var(--panel); border-radius: 20px; border: 1px solid #555; padding: 20px; text-align: center; margin-bottom: 15px; position: relative; }
-        .monster-box { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 100px; }
-        .monster-img { max-width: 180px; max-height: 180px; filter: drop-shadow(0 0 20px rgba(255,0,0,0.4)); transition: transform 0.05s; }
+        /* Battle Stage */
+        .battle-area { background: linear-gradient(to bottom, #1a1a2e, #0a0a12); border-radius: 20px; border: 2px solid #444; padding: 20px; text-align: center; margin-bottom: 20px; position: relative; }
+        .monster-display { font-size: 80px; height: 160px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); transition: 0.1s; user-select: none; }
         
-        .hp-outer { height: 24px; background: #000; border-radius: 12px; border: 1px solid #666; overflow: hidden; position: relative; margin: 15px 0; }
-        .hp-inner { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: width 0.1s; }
-        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 22px; font-weight: bold; font-family: 'Orbitron'; text-shadow: 1px 1px 2px #000; }
+        .hp-container { height: 25px; background: #222; border-radius: 12.5px; border: 1px solid #555; overflow: hidden; position: relative; margin: 15px 0; }
+        .hp-bar { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: width 0.1s; }
+        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 12px; line-height: 23px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
 
         /* Cards */
-        .card { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid #555; position: relative; }
-        .card.MYTHIC { border-left-color: var(--mythic); background: linear-gradient(90deg, rgba(255,71,87,0.12) 0%, transparent 100%); }
+        .card { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid #555; }
+        .card.MYTHIC { border-left-color: var(--mythic); background: rgba(255, 71, 87, 0.1); }
         .card.SSR { border-left-color: var(--ssr); }
-        .hero-img { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #444; overflow: hidden; margin-right: 12px; display: flex; align-items: center; justify-content: center; background: #000; font-size: 30px; }
-        .hero-img img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-detail { flex: 1; }
-        .hero-detail b { font-size: 14px; display: block; }
-        .hero-detail small { font-size: 11px; color: #999; font-family: 'Orbitron'; }
+        .card-img { width: 50px; height: 50px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 12px; border: 1px solid #444; }
+        .card-info { flex: 1; }
+        .card-info b { font-size: 14px; display: block; }
+        .card-info small { font-size: 11px; color: #aaa; }
 
-        /* Navigation */
-        .nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: #000; display: flex; border-top: 1px solid #333; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #555; cursor: pointer; }
-        .nav-item.active { color: var(--dia); border-top: 2px solid var(--dia); }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
+        /* Nav Bar */
+        .nav { position: absolute; bottom: 0; width: 100%; height: 70px; background: #111; display: flex; border-top: 1px solid #444; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #666; cursor: pointer; }
+        .nav-item.active { color: var(--dia); background: #1a1a2e; }
+        .nav-item i { font-size: 20px; margin-bottom: 3px; font-style: normal; }
 
         /* Buttons */
         .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.1s; }
         .btn:active { transform: scale(0.95); }
-        .btn-main { width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #ff416c, #ff4b2b); font-family: 'Orbitron'; box-shadow: 0 5px 20px rgba(255,65,108,0.4); }
+        .btn-hit { width: 100%; padding: 15px; font-size: 20px; background: linear-gradient(to right, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
         .btn-buy { background: var(--gold); color: #000; padding: 6px 12px; font-size: 11px; }
 
-        /* Ranking */
-        .rank-item { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 5px; font-size: 13px; }
-
-        /* Toast & Effects */
-        #toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: var(--dia); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; opacity: 0; transition: 0.3s; z-index: 10000; pointer-events: none; }
+        /* Effects */
+        #toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dia); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; }
+        .damage-pop { position: absolute; color: white; font-weight: bold; font-size: 20px; animation: floatUp 0.5s ease-out forwards; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px); } }
+        
         .hidden { display: none !important; }
-        .crit-text { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-size: 28px; font-weight: bold; animation: popUp 0.5s ease-out forwards; pointer-events: none; }
-        @keyframes popUp { 0% { opacity:1; transform:translateY(0) scale(1); } 100% { opacity:0; transform:translateY(-100px) scale(1.5); } }
+        .overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
 
-<div id="login-screen" style="position:fixed; inset:0; background:#050508; z-index:9000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
-    <div style="font-size: 60px; margin-bottom: 10px;">👑</div>
-    <h1 style="font-family:'Orbitron'; color:var(--dia); font-size:28px; margin:0; letter-spacing:3px;">OVERLORD</h1>
-    <p style="color:#555; font-size:11px; margin-bottom:40px;">THE ULTIMATE VISUAL SAGA</p>
-    <input type="text" id="uid" style="width:100%; padding:16px; background:#111; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:12px;" placeholder="EMPIRE ID">
-    <button class="btn btn-main" onclick="Game.init()">BEGIN EMPIRE</button>
+<div id="login-screen" class="overlay">
+    <div style="font-size: 80px; margin-bottom: 20px;">🎖️</div>
+    <h1 style="margin: 0; color: var(--dia); letter-spacing: 5px;">OVERLORD</h1>
+    <p style="color: #666; font-size: 12px; margin-bottom: 40px;">THE FINAL SAGA REBORN</p>
+    <input type="text" id="join-id" style="width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 10px; text-align: center;" placeholder="NICKNAME">
+    <button class="btn btn-hit" style="margin-top: 20px;" onclick="Engine.start()">START EMPIRE</button>
 </div>
 
 <div id="app" class="hidden">
     <header class="header">
-        <div class="stat-box"><div>GOLD</div><span id="txt-gold" style="color:var(--gold)">0</span></div>
-        <div class="stat-box"><div>DIAMOND</div><span id="txt-dia" style="color:var(--dia)">0</span></div>
-        <div class="stat-box"><div>POWER</div><span id="txt-atk" style="color:#00ff88">0</span></div>
+        <div class="stat-box"><small>GOLD</small><span id="txt-gold" style="color:var(--gold)">0</span></div>
+        <div class="stat-box"><small>DIAMOND</small><span id="txt-dia" style="color:var(--dia)">0</span></div>
+        <div class="stat-box"><small>POWER</small><span id="txt-atk" style="color:#00ff88">0</span></div>
     </header>
 
     <div class="main-content">
         <div id="tab-battle">
-            <div class="stage-card" id="b-zone">
-                <div style="font-family:'Orbitron'; color:var(--ssr); font-size:12px; margin-bottom:10px;">STAGE <span id="txt-stage">1</span></div>
-                <div class="monster-box" id="monster-box"></div>
-                <div class="hp-outer">
-                    <div id="hp-bar" class="hp-inner"></div>
-                    <div id="hp-txt" class="hp-text">0 / 0</div>
+            <div class="battle-area" id="battle-screen">
+                <div style="font-size: 12px; color: var(--ssr); margin-bottom: 10px;">STAGE <span id="txt-stage">1</span></div>
+                <div class="monster-display" id="monster-icon">👾</div>
+                <div class="hp-container">
+                    <div id="hp-bar" class="hp-bar"></div>
+                    <div id="hp-text" class="hp-text">0 / 0</div>
                 </div>
-                <button class="btn btn-main" onmousedown="Game.hit()">STRIKE</button>
+                <button class="btn btn-hit" onmousedown="Engine.clickHit()">STRIKE</button>
             </div>
-            <div id="artis-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;"></div>
+            <div id="artis-info" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
         </div>
 
         <div id="tab-draw" class="hidden">
-            <h2 style="text-align:center; font-family:'Orbitron'; margin-bottom:20px;">SUMMON</h2>
-            <div id="draw-view" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; min-height:160px; margin-bottom:20px;"></div>
-            <button class="btn btn-main" onclick="Game.summon()">10X SUMMON (1,000💎)</button>
+            <h3 style="text-align:center;">SUMMON HERO</h3>
+            <div id="draw-result" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; min-height:150px; margin-bottom:20px;"></div>
+            <button class="btn btn-hit" onclick="Engine.summon()">10 SUMMON (1,000💎)</button>
         </div>
 
         <div id="tab-hero" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0;">MY LEGION (<span id="txt-hcount">0</span>)</h3>
-                <button class="btn btn-buy" onclick="Game.autoMerge()">AUTO MERGE</button>
+                <h3 style="margin:0;">MY HEROES (<span id="txt-hcount">0</span>)</h3>
+                <button class="btn btn-buy" onclick="Engine.autoMerge()">AUTO MERGE</button>
             </div>
             <div id="hero-list"></div>
         </div>
 
         <div id="tab-rank" class="hidden">
-            <h3 style="font-family:'Orbitron'; text-align:center;">GLOBAL RANKING</h3>
-            <div id="rank-list" style="margin-bottom:30px;"></div>
-            <h3 style="font-family:'Orbitron'; text-align:center;">PLUNDER</h3>
+            <h3 style="text-align:center;">LEADERBOARD</h3>
+            <div id="rank-list" style="margin-bottom:20px;"></div>
             <div class="card" style="border-left-color:var(--mythic);">
-                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:#fff; padding:10px;" placeholder="Target User ID">
-                <button class="btn btn-buy" style="background:var(--mythic); color:#fff;" onclick="Game.pvp()">ATTACK</button>
+                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:#fff; padding:10px;" placeholder="Target ID">
+                <button class="btn btn-buy" style="background:var(--mythic); color:#fff;" onclick="Engine.plunder()">PLUNDER</button>
             </div>
-            <p id="pvp-log" style="text-align:center; font-size:12px; color:var(--ssr);"></p>
         </div>
 
         <div id="tab-shop" class="hidden">
-            <h3 style="font-family:'Orbitron'; text-align:center;">EMPIRE SHOP</h3>
+            <h3 style="text-align:center;">EMPIRE SHOP</h3>
             <div class="card">
-                <div class="hero-detail"><b>AUTO STRIKE</b><small>30s Auto Attack (Own: <span id="txt-auto">0</span>s)</small></div>
-                <button class="btn btn-buy" onclick="Game.buy('auto')">3,000💰</button>
+                <div class="card-info"><b>Auto Strike (30s)</b><small>Current: <span id="txt-auto">0</span>s</small></div>
+                <button class="btn btn-buy" onclick="Engine.buy('auto')">3,000💰</button>
             </div>
             <div class="card">
-                <div class="hero-detail"><b>DIAMOND EXCHANGE</b><small>Convert 10,000 Gold to 100💎</small></div>
-                <button class="btn btn-buy" onclick="Game.buy('dia')">10,000💰</button>
+                <div class="card-info"><b>Diamond Box</b><small>10,000 Gold → 100 Dia</small></div>
+                <button class="btn btn-buy" onclick="Engine.buy('dia')">10,000💰</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="Game.tab('battle', this)"><i>⚔️</i>BATTLE</div>
-        <div class="nav-item" onclick="Game.tab('draw', this)"><i>🔮</i>SUMMON</div>
-        <div class="nav-item" onclick="Game.tab('hero', this)"><i>🛡️</i>LEGION</div>
-        <div class="nav-item" onclick="Game.tab('rank', this)"><i>🏆</i>RANK</div>
-        <div class="nav-item" onclick="Game.tab('shop', this)"><i>🛒</i>SHOP</div>
+        <div class="nav-item active" onclick="Engine.tab('battle', this)"><i>⚔️</i>Battle</div>
+        <div class="nav-item" onclick="Engine.tab('draw', this)"><i>🔮</i>Draw</div>
+        <div class="nav-item" onclick="Engine.tab('hero', this)"><i>🛡️</i>Legion</div>
+        <div class="nav-item" onclick="Engine.tab('rank', this)"><i>🏆</i>Rank</div>
+        <div class="nav-item" onclick="Engine.tab('shop', this)"><i>🛒</i>Shop</div>
     </nav>
 </div>
 
 <script>
 /**
- * MYTHIC OVERLORD: ULTIMATE ENGINE
+ * MYTHIC OVERLORD: THE FINAL ENGINE
  */
-const Game = (() => {
+const Engine = (() => {
     let user = "";
-    let state = { gold: 5000, dia: 2000, stage: 1, inv: [], book: [], artis: {1:0, 2:0, 3:0}, mHp: 2000, maxHp: 2000 };
-    let buff = { auto: 0 };
-    
-    // Static Hero Database
-    const DB = [];
-    const EMOJIS = { SR: "🛡️", SSR: "🔥", MYTHIC: "👑" };
-    const PROMPTS = { SR: "knight", SSR: "wizard", MYTHIC: "angelic+warrior" };
+    let data = { gold: 5000, dia: 2000, stage: 1, inv: [], book: [], artis: {1:0, 2:0, 3:0}, mHp: 2000, maxHp: 2000 };
+    let autoTime = 0;
 
-    for(let i=1; i<=40; i++) {
-        let g = i > 36 ? "MYTHIC" : (i > 20 ? "SSR" : "SR");
-        DB.push({
-            id: i, name: `${g} Hero #${i}`, grade: g,
-            emoji: EMOJIS[g],
-            img: `https://image.pollinations.ai/prompt/fantasy+${PROMPTS[g]}+portrait+${i}?width=150&height=150&seed=${i+500}&nologo=true`,
-            atk: i * 300 + (i > 20 ? 10000 : 1000)
+    const HERO_DB = [];
+    const EMOJIS = ["⚔️", "🛡️", "🏹", "🪄", "🧙", "🧛", "🧞", "🧚", "🧜", "🦄", "🦁", "🐉", "👑", "💎"];
+    for(let i=1; i<=30; i++) {
+        let g = i > 25 ? "MYTHIC" : (i > 15 ? "SSR" : "SR");
+        HERO_DB.push({
+            id: i, name: `${g} Unit #${i}`, grade: g,
+            emoji: EMOJIS[i % EMOJIS.length],
+            atk: i * 300 + (i > 15 ? 10000 : 800)
         });
     }
 
-    const MONSTERS = ["🐉", "💀", "👹", "🕷️", "🐺", "🧛", "👻"];
+    const MONSTERS = ["👾", "👹", "💀", "👻", "🐉", "🧟", "🧛", "🕷️", "🦂"];
 
-    const toast = (m) => {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.style.opacity = 1;
-        setTimeout(() => t.style.opacity = 0, 1500);
-    };
-
-    const getPower = () => {
-        let base = state.inv.reduce((s, h) => s + (h.atk * h.star), 0);
-        let bonus = 1 + (state.book.length * 0.05) + (state.artis[1] * 0.5);
-        return (base + 100) * bonus;
-    };
-
-    const save = () => {
-        if(!user) return;
-        const globalData = JSON.parse(localStorage.getItem('mo_ultimate_db') || "{}");
-        globalData[user] = state;
-        localStorage.setItem('mo_ultimate_db', JSON.stringify(globalData));
-    };
-
-    const updateMonster = () => {
-        const mIdx = state.stage % MONSTERS.length;
-        const box = document.getElementById('monster-box');
-        const seed = state.stage + 1000;
-        const url = `https://image.pollinations.ai/prompt/fantasy+monster+${seed}?width=300&height=300&seed=${seed}&nologo=true`;
-        
-        // 이미지 로딩 실패 대비 이모지 포함 구조
-        box.innerHTML = `
-            <div style="position:relative;">
-                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:0;">${MONSTERS[mIdx]}</div>
-                <img src="${url}" class="monster-img" id="m-img" style="position:relative; z-index:1;" onerror="this.style.display='none'">
-            </div>`;
-    };
-
-    const sync = () => {
-        document.getElementById('txt-gold').innerText = Math.floor(state.gold).toLocaleString();
-        document.getElementById('txt-dia').innerText = Math.floor(state.dia).toLocaleString();
-        document.getElementById('txt-atk').innerText = Math.floor(getPower()).toLocaleString();
-        document.getElementById('txt-stage').innerText = state.stage;
-        document.getElementById('txt-auto').innerText = buff.auto;
-        
-        const per = Math.max(0, (state.mHp / state.maxHp) * 100);
-        document.getElementById('hp-bar').style.width = per + "%";
-        document.getElementById('hp-txt').innerText = `${Math.floor(state.mHp).toLocaleString()} / ${state.maxHp.toLocaleString()}`;
-        
-        const artGrid = document.getElementById('artis-grid');
-        artGrid.innerHTML = '';
-        [1,2,3].forEach(i => {
-            artGrid.innerHTML += `<div class="stat-box" style="font-size:10px;">🏺 유물 Lv.${state.artis[i]}</div>`;
-        });
-        save();
-    };
-
-    return {
-        init: () => {
-            const id = document.getElementById('uid').value.trim();
-            if(!id) return alert("ENTER YOUR EMPIRE ID");
-            user = id;
-            const globalData = JSON.parse(localStorage.getItem('mo_ultimate_db') || "{}");
-            if(globalData[id]) state = globalData[id];
-            
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            updateMonster();
-            sync();
-
-            // Game Heartbeat
-            setInterval(() => {
-                if(buff.auto > 0) { Game.hit(getPower() * 0.5); buff.auto--; }
-                Game.hit(getPower() * 0.1, true); // Passive
-                sync();
-            }, 1000);
-        },
-
-        hit: (forced, isPassive) => {
-            const dmg = forced || getPower();
-            state.mHp -= dmg;
-            
-            if(!isPassive && !forced) {
-                const m = document.getElementById('m-img');
-                if(m) { m.style.transform = "scale(0.9) rotate(5deg)"; setTimeout(()=>m.style.transform="scale(1)", 50); }
-                
-                // Crit Effect
-                if(Math.random() < 0.2) {
-                    const c = document.createElement('div');
-                    c.className = 'crit-text';
-                    c.innerText = 'CRITICAL!';
-                    c.style.left = (Math.random()*50 + 25) + "%";
-                    c.style.top = "40%";
-                    document.getElementById('b-zone').appendChild(c);
-                    setTimeout(() => c.remove(), 500);
-                }
-            }
-
-            if(state.mHp <= 0) {
-                state.gold += (1000 * state.stage) * (1 + state.artis[2]*0.5);
-                if(Math.random() < 0.1) state.artis[Math.floor(Math.random()*3)+1]++;
-                state.stage++;
-                state.maxHp = Math.floor(2000 * Math.pow(1.3, state.stage));
-                state.mHp = state.maxHp;
-                updateMonster();
-                toast("STAGE COMPLETE!");
-            }
-            if(!isPassive) sync();
-        },
-
-        summon: () => {
-            if(state.dia < 1000) return toast("LACK OF DIAMOND");
-            state.dia -= 1000;
-            const view = document.getElementById('draw-view');
-            view.innerHTML = '';
-            for(let i=0; i<10; i++) {
-                const p = DB[Math.floor(Math.random() * DB.length)];
-                state.inv.push({...p, uid: Date.now()+Math.random(), star: 1});
-                if(!state.book.includes(p.id)) state.book.push(p.id);
-                view.innerHTML += `<div class="hero-img" style="width:100%; aspect-ratio:1;">${p.emoji}</div>`;
-            }
-            sync();
-        },
-
-        autoMerge: () => {
-            let evolved = false;
-            let m = {};
-            state.inv.forEach(h => { if(!m[h.id]) m[h.id] = []; m[h.id].push(h); });
-            for(let id in m) {
-                while(m[id].length >= 2) {
-                    const h1 = m[id].pop(); const h2 = m[id].pop();
-                    h1.star++;
-                    state.inv = state.inv.filter(x => x.uid !== h2.uid);
-                    evolved = true;
-                }
-            }
-            if(evolved) { toast("LEGION EVOLVED!"); Game.renderHero(); sync(); }
-        },
-
-        pvp: () => {
-            const target = document.getElementById('target-id').value.trim();
-            const db = JSON.parse(localStorage.getItem('mo_ultimate_db') || "{}");
-            if(!db[target] || target === user) return toast("USER NOT FOUND");
-            
-            const log = document.getElementById('pvp-log');
-            if(getPower() > (db[target].stage * 20000)) {
-                const stolen = Math.floor(db[target].gold * 0.15);
-                state.gold += stolen;
-                db[target].gold -= stolen;
-                localStorage.setItem('mo_ultimate_db', JSON.stringify(db));
-                log.innerText = `VICTORY! STOLE ${stolen.toLocaleString()} GOLD`;
-            } else {
-                log.innerText = "DEFEAT... TARGET IS TOO POWERFUL";
-            }
-        },
-
-        renderHero: () => {
-            const list = document.getElementById('hero-list');
-            list.innerHTML = '';
-            state.inv.sort((a,b)=> (b.atk*b.star)-(a.atk*a.star)).forEach(h => {
-                list.innerHTML += `
-                    <div class="card ${h.grade}">
-                        <div class="hero-img">
-                            <img src="${h.img}" onerror="this.style.display='none'">
-                            <span style="position:absolute;">${h.emoji}</span>
-                        </div>
-                        <div class="hero-detail">
-                            <b>${h.name} ★${h.star}</b>
-                            <small>ATK: ${Math.floor(h.atk*h.star).toLocaleString()}</small>
-                        </div>
-                        <button class="btn-buy" style="background:#444; color:#fff;" onclick="Game.sell(${h.uid})">SELL</button>
-                    </div>`;
-            });
-            document.getElementById('txt-hcount').innerText = state.inv.length;
-        },
-
-        sell: (uid) => {
-            state.inv = state.inv.filter(h => h.uid !== uid);
-            state.gold += 1000;
-            Game.renderHero(); sync();
-        },
-
-        renderRank: () => {
-            const db = JSON.parse(localStorage.getItem('mo_ultimate_db') || "{}");
-            const sorted = Object.keys(db).map(k => ({id:k, s:db[k].stage})).sort((a,b)=>b.s-a.s);
-            document.getElementById('rank-list').innerHTML = sorted.slice(0,10).map((u,i)=>`
-                <div class="rank-item">
-                    <span>${i+1}. <b>${u.id}</b></span>
-                    <span style="color:var(--gold)">STAGE ${u.s}</span>
-                </div>`).join('');
-        },
-
-        buy: (type) => {
-            if(type === 'auto' && state.gold >= 3000) { state.gold -= 3000; buff.auto += 30; toast("AUTO-STRIKE ON"); }
-            else if(type === 'dia' && state.gold >= 10000) { state.gold -= 10000; state.dia += 100; toast("CONVERTED"); }
-            else toast("NOT ENOUGH GOLD");
-            sync();
-        },
-
-        tab: (name, el) => {
-            document.querySelectorAll('.main-content > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`tab-${name}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            if(name === 'hero') Game.renderHero();
-            if(name === 'rank') Game.renderRank();
-        }
-    };
-})();
-</script>
-</body>
-</html>
-        /* Hero Cards */
-        .card { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid #555; position: relative; }
-        .card.MYTHIC { border-left-color: var(--mythic); background: linear-gradient(90deg, rgba(255,71,87,0.1) 0%, rgba(255,255,255,0.05) 100%); }
-        .card.SSR { border-left-color: var(--ssr); }
-        .hero-img { width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444; overflow: hidden; margin-right: 12px; }
-        .hero-img img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-detail { flex: 1; }
-        .hero-detail b { font-size: 14px; display: block; color: #eee; }
-        .hero-detail small { font-size: 11px; color: #999; font-family: 'Orbitron'; }
-
-        /* Navigation */
-        .nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: #000; display: flex; border-top: 1px solid #333; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #555; cursor: pointer; }
-        .nav-item.active { color: var(--dia); border-top: 2px solid var(--dia); background: #0a0a15; }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
-
-        /* UI Elements */
-        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.1s; }
-        .btn:active { transform: scale(0.95); }
-        .btn-main { width: 100%; padding: 18px; font-size: 20px; background: linear-gradient(135deg, #ff416c, #ff4b2b); font-family: 'Orbitron'; box-shadow: 0 5px 20px rgba(255,65,108,0.4); }
-        .btn-sm { padding: 6px 12px; font-size: 11px; background: var(--panel); border: 1px solid #555; }
-        .btn-buy { background: var(--gold); color: #000; padding: 8px 15px; font-size: 12px; }
-
-        /* Social/Ranking */
-        .rank-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
-
-        /* Toasts & Effects */
-        #toast { position: fixed; top: 12%; left: 50%; transform: translateX(-50%); background: var(--dia); color: #000; padding: 12px 25px; border-radius: 25px; font-weight: bold; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 9999; }
-        .hidden { display: none !important; }
-        .crit { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-size: 24px; font-weight: bold; animation: floatUp 0.6s ease-out forwards; pointer-events: none; z-index: 100; }
-        @keyframes floatUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-80px) rotate(10deg); } }
-    </style>
-</head>
-<body>
-
-<div id="toast"></div>
-
-<div id="login-screen" class="overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
-    <h1 style="font-family:'Orbitron'; color:var(--dia); font-size:32px; margin:0;">OVERLORD</h1>
-    <p style="color:#666; font-size:12px; margin-bottom:40px;">UNLEASH THE MYTHIC SAGA</p>
-    <input type="text" id="uid" style="width:100%; padding:16px; background:#111; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:12px;" placeholder="EMPIRE ID">
-    <input type="password" id="upw" style="width:100%; padding:16px; background:#111; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:24px;" placeholder="PASSWORD">
-    <button class="btn btn-main" onclick="Game.start()">INITIALIZE</button>
-</div>
-
-<div id="app" class="hidden">
-    <header class="header">
-        <div class="stat-box"><div>GOLD</div><span id="gold" style="color:var(--gold)">0</span></div>
-        <div class="stat-box"><div>DIAMOND</div><span id="dia" style="color:var(--dia)">0</span></div>
-        <div class="stat-box"><div>ATK</div><span id="atk" style="color:#00ff88">0</span></div>
-    </header>
-
-    <div class="main-content">
-        <div id="tab-battle">
-            <div class="stage-card" id="b-zone">
-                <div style="font-family:'Orbitron'; color:var(--ssr); font-size:13px;">STAGE <span id="stage-num">1</span></div>
-                <div class="monster-box" id="monster-render"></div>
-                <div class="hp-outer">
-                    <div id="hp-bar" class="hp-inner"></div>
-                    <div id="hp-txt" class="hp-text">0 / 0</div>
-                </div>
-                <button class="btn btn-main" onmousedown="Game.hit()">STRIKE</button>
-            </div>
-            <div id="artis-info" style="font-size:11px; color:#888; text-align:center; margin-bottom:10px;"></div>
-            <div id="artis-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
-        </div>
-
-        <div id="tab-draw" class="hidden">
-            <h2 style="text-align:center; font-family:'Orbitron'; color:var(--dia);">SUMMON</h2>
-            <div id="draw-result" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; min-height:180px; margin-bottom:20px;"></div>
-            <button class="btn btn-main" onclick="Game.summon()">10X SUMMON (1,000💎)</button>
-        </div>
-
-        <div id="tab-hero" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0;">LEGION (<span id="h-count">0</span>)</h3>
-                <button class="btn btn-sm" onclick="Game.autoMerge()">AUTO MERGE</button>
-            </div>
-            <div id="hero-list"></div>
-        </div>
-
-        <div id="tab-social" class="hidden">
-            <h3 style="font-family:'Orbitron'; text-align:center;">HALL OF FAME</h3>
-            <div id="rank-list" style="margin-bottom:30px;"></div>
-            
-            <h3 style="font-family:'Orbitron'; text-align:center;">PLUNDER ID</h3>
-            <div class="card" style="border-left-color:var(--mythic);">
-                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:#fff; padding:10px;" placeholder="Target User ID">
-                <button class="btn btn-buy" style="background:var(--mythic); color:#fff;" onclick="Game.pvp()">ATTACK</button>
-            </div>
-            <p id="pvp-result" style="text-align:center; font-size:12px; margin-top:10px;"></p>
-        </div>
-
-        <div id="tab-shop" class="hidden">
-            <h3 style="font-family:'Orbitron'; text-align:center;">EMPIRE SHOP</h3>
-            <div class="card">
-                <div class="hero-detail"><b>AUTO STRIKE</b><small>30s Auto Attack (Own: <span id="auto-time">0</span>s)</small></div>
-                <button class="btn btn-buy" onclick="Game.buy('auto')">3,000💰</button>
-            </div>
-            <div class="card">
-                <div class="hero-detail"><b>DIAMOND EXCHANGE</b><small>Convert Gold to 100💎</small></div>
-                <button class="btn btn-buy" onclick="Game.buy('dia')">8,000💰</button>
-            </div>
-        </div>
-    </div>
-
-    <nav class="nav">
-        <div class="nav-item active" onclick="Game.changeTab('battle', this)"><i>⚔️</i>BATTLE</div>
-        <div class="nav-item" onclick="Game.changeTab('draw', this)"><i>🔮</i>SUMMON</div>
-        <div class="nav-item" onclick="Game.changeTab('hero', this)"><i>🛡️</i>LEGION</div>
-        <div class="nav-item" onclick="Game.changeTab('social', this)"><i>🏆</i>RANK</div>
-        <div class="nav-item" onclick="Game.changeTab('shop', this)"><i>🛒</i>SHOP</div>
-    </nav>
-</div>
-
-<script>
-/**
- * MYTHIC OVERLORD: THE FULL SAGA ENGINE
- */
-const Game = (() => {
-    let user = "";
-    let data = { gold: 3000, dia: 2000, stage: 1, inv: [], book: [], artis: {1:0, 2:0, 3:0}, mHp: 2000, maxHp: 2000 };
-    let buff = { auto: 0 };
-    
-    const DB = [];
-    const PROMPTS = { SR: "armored+knight", SSR: "glowing+mage", MYTHIC: "godlike+angelic+warrior" };
-    
-    // Build Global Hero Database with Static Seeds
-    for(let i=1; i<=40; i++) {
-        let g = i > 35 ? "MYTHIC" : (i > 20 ? "SSR" : "SR");
-        DB.push({
-            id: i, name: `${g} Overlord #${i}`, grade: g,
-            img: `https://image.pollinations.ai/prompt/fantasy+${PROMPTS[g]}+portrait?width=150&height=150&seed=${i+777}&nologo=true`,
-            atk: i * 250 + (i > 20 ? 8000 : 800)
-        });
-    }
-
-    const MONSTERS = ["demon", "dragon", "beholder", "lich", "kraken", "golem", "hydra"];
-
-    const toast = (m) => {
+    const showToast = (m) => {
         const t = document.getElementById('toast');
         t.innerText = m; t.style.opacity = 1;
         setTimeout(() => t.style.opacity = 0, 1500);
@@ -529,106 +170,97 @@ const Game = (() => {
 
     const getAtk = () => {
         let base = data.inv.reduce((s, h) => s + (h.atk * h.star), 0);
-        let bookBonus = 1 + (data.book.length * 0.05);
-        let artiBonus = 1 + (data.artis[1] * 0.4);
-        return (base + 100) * bookBonus * artiBonus;
+        let bonus = 1 + (data.book.length * 0.05) + (data.artis[1] * 0.5);
+        return (base + 100) * bonus;
     };
 
     const save = () => {
         if(!user) return;
-        const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
-        totalDB[user] = data;
-        localStorage.setItem('mo_full_db', JSON.stringify(totalDB));
+        const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
+        all[user] = data;
+        localStorage.setItem('mo_final_db', JSON.stringify(all));
     };
 
-    const updateMonster = () => {
-        const m = MONSTERS[data.stage % MONSTERS.length];
-        const url = `https://image.pollinations.ai/prompt/fantasy+${m}+monster+boss+cinematic?width=300&height=300&seed=${data.stage+99}&nologo=true`;
-        document.getElementById('monster-render').innerHTML = `<img src="${url}" class="monster-img" id="m-img">`;
-    };
-
-    const sync = () => {
-        document.getElementById('gold').innerText = Math.floor(data.gold).toLocaleString();
-        document.getElementById('dia').innerText = Math.floor(data.dia).toLocaleString();
-        document.getElementById('atk').innerText = Math.floor(getAtk()).toLocaleString();
-        document.getElementById('stage-num').innerText = data.stage;
-        document.getElementById('auto-time').innerText = buff.auto;
+    const updateUI = () => {
+        document.getElementById('txt-gold').innerText = Math.floor(data.gold).toLocaleString();
+        document.getElementById('txt-dia').innerText = Math.floor(data.dia).toLocaleString();
+        document.getElementById('txt-atk').innerText = Math.floor(getAtk()).toLocaleString();
+        document.getElementById('txt-stage').innerText = data.stage;
+        document.getElementById('txt-auto').innerText = autoTime;
         
-        const per = Math.max(0, (data.mHp / data.maxHp) * 100);
-        document.getElementById('hp-bar').style.width = per + "%";
-        document.getElementById('hp-txt').innerText = `${Math.floor(data.mHp).toLocaleString()} / ${data.maxHp.toLocaleString()}`;
+        const hpPer = Math.max(0, (data.mHp / data.maxHp) * 100);
+        document.getElementById('hp-bar').style.width = hpPer + "%";
+        document.getElementById('hp-text').innerText = `${Math.floor(data.mHp).toLocaleString()} / ${data.maxHp.toLocaleString()}`;
+        
+        const artGrid = document.getElementById('artis-info');
+        artGrid.innerHTML = '';
+        [1,2,3].forEach(i => artGrid.innerHTML += `<div class="stat-box"><small>ARTIFACT</small>Lv.${data.artis[i]}</div>`);
         save();
     };
 
     return {
         start: () => {
-            const id = document.getElementById('uid').value.trim();
-            if(!id) return alert("ENTER ID");
+            const id = document.getElementById('join-id').value.trim();
+            if(!id) return alert("ENTER NICKNAME");
             user = id;
-            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
-            if(totalDB[id]) data = totalDB[id];
+            const saved = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
+            if(saved[id]) data = saved[id];
             
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            updateMonster();
-            sync();
-
-            // Core Loop
+            
+            updateUI();
             setInterval(() => {
-                if(buff.auto > 0) { Game.hit(getAtk() * 0.5); buff.auto--; sync(); }
-                Game.hit(getAtk() * 0.05); // Idle Damage
+                if(autoTime > 0) { Engine.doDamage(getAtk() * 0.5); autoTime--; }
+                Engine.doDamage(getAtk() * 0.05, true);
+                updateUI();
             }, 1000);
         },
 
-        hit: (forced) => {
-            const dmg = forced || getAtk();
-            data.mHp -= dmg;
+        clickHit: () => {
+            Engine.doDamage(getAtk());
+            const m = document.getElementById('monster-icon');
+            m.style.transform = "scale(0.8) translateY(10px)";
+            setTimeout(() => m.style.transform = "scale(1)", 50);
             
-            if(!forced) { // Manual Hit Effects
-                const mImg = document.getElementById('m-img');
-                if(mImg) {
-                    mImg.style.transform = "scale(0.92) translateY(5px)";
-                    setTimeout(() => mImg.style.transform = "scale(1)", 50);
-                }
-                // Crit Visual
-                if(Math.random() < 0.2) {
-                    const c = document.createElement('div');
-                    c.className = 'crit';
-                    c.innerText = 'CRITICAL!';
-                    c.style.left = (Math.random()*60 + 20) + "%";
-                    c.style.top = "40%";
-                    document.getElementById('b-zone').appendChild(c);
-                    setTimeout(() => c.remove(), 600);
-                }
-            }
+            const pop = document.createElement('div');
+            pop.className = 'damage-pop';
+            pop.innerText = `-${Math.floor(getAtk()).toLocaleString()}`;
+            pop.style.left = (Math.random()*40+30) + "%";
+            pop.style.top = "40%";
+            document.getElementById('battle-screen').appendChild(pop);
+            setTimeout(() => pop.remove(), 500);
+        },
 
+        doDamage: (dmg, isPassive) => {
+            data.mHp -= dmg;
             if(data.mHp <= 0) {
-                data.gold += (1000 * data.stage) * (1 + data.artis[2] * 0.5);
-                if(Math.random() < 0.15) {
-                    const r = Math.floor(Math.random()*3)+1;
-                    data.artis[r]++;
-                    toast("🏺 ARTIFACT RESONANCE!");
+                data.gold += (500 * data.stage) * (1 + data.artis[2]);
+                if(Math.random() < 0.1) {
+                    data.artis[Math.floor(Math.random()*3)+1]++;
+                    showToast("🏺 Artifact Resonance!");
                 }
                 data.stage++;
-                data.maxHp = Math.floor(2000 * Math.pow(1.28, data.stage));
+                data.maxHp = Math.floor(2000 * Math.pow(1.25, data.stage));
                 data.mHp = data.maxHp;
-                updateMonster();
+                document.getElementById('monster-icon').innerText = MONSTERS[data.stage % MONSTERS.length];
+                showToast("STAGE CLEAR!");
             }
-            sync();
+            if(!isPassive) updateUI();
         },
 
         summon: () => {
-            if(data.dia < 1000) return toast("INSUFFICIENT DIAMOND");
+            if(data.dia < 1000) return showToast("No Diamond!");
             data.dia -= 1000;
             const res = document.getElementById('draw-result');
             res.innerHTML = '';
             for(let i=0; i<10; i++) {
-                const pick = DB[Math.floor(Math.random() * DB.length)];
+                const pick = HERO_DB[Math.floor(Math.random() * HERO_DB.length)];
                 data.inv.push({...pick, uid: Date.now() + Math.random(), star: 1});
                 if(!data.book.includes(pick.id)) data.book.push(pick.id);
-                res.innerHTML += `<div style="width:100%; aspect-ratio:1; border-radius:5px; overflow:hidden; border:1px solid #555;"><img src="${pick.img}" style="width:100%; height:100%; object-fit:cover;"></div>`;
+                res.innerHTML += `<div class="card-img">${pick.emoji}</div>`;
             }
-            sync();
+            updateUI();
         },
 
         autoMerge: () => {
@@ -637,83 +269,64 @@ const Game = (() => {
             data.inv.forEach(h => { if(!groups[h.id]) groups[h.id] = []; groups[h.id].push(h); });
             for(let id in groups) {
                 while(groups[id].length >= 2) {
-                    const h1 = groups[id].pop();
-                    const h2 = groups[id].pop();
+                    const h1 = groups[id].pop(); const h2 = groups[id].pop();
                     h1.star++;
                     data.inv = data.inv.filter(x => x.uid !== h2.uid);
                     evolved = true;
                 }
             }
-            if(evolved) { toast("LEGION EVOLVED"); Game.renderHero(); sync(); }
+            if(evolved) { showToast("Evolved!"); Engine.renderHero(); updateUI(); }
         },
 
-        pvp: () => {
+        plunder: () => {
             const target = document.getElementById('target-id').value.trim();
-            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
-            if(!totalDB[target] || target === user) return toast("INVALID TARGET");
+            const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
+            if(!all[target] || target === user) return showToast("Invalid Target");
             
-            const myAtk = getAtk();
-            const opAtk = totalDB[target].stage * 15000; // NPC/Stat based defense
-            
-            const log = document.getElementById('pvp-result');
-            if(myAtk > opAtk) {
-                const steal = Math.floor(totalDB[target].gold * 0.1);
+            if(getAtk() > (all[target].stage * 15000)) {
+                const steal = Math.floor(all[target].gold * 0.1);
                 data.gold += steal;
-                totalDB[target].gold -= steal;
-                localStorage.setItem('mo_full_db', JSON.stringify(totalDB));
-                log.innerText = `SUCCESS! STOLE ${steal.toLocaleString()} GOLD`;
-                log.style.color = "var(--dia)";
+                all[target].gold -= steal;
+                localStorage.setItem('mo_final_db', JSON.stringify(all));
+                showToast(`Success! Stole ${steal} Gold`);
             } else {
-                log.innerText = `DEFEAT! TARGET IS TOO STRONG`;
-                log.style.color = "var(--mythic)";
+                showToast("Defeat! Too strong.");
             }
-            sync();
+            updateUI();
         },
 
         renderHero: () => {
             const list = document.getElementById('hero-list');
             list.innerHTML = '';
             data.inv.sort((a,b) => (b.atk*b.star)-(a.atk*a.star)).forEach(h => {
-                list.innerHTML += `
-                <div class="card ${h.grade}">
-                    <div class="hero-img"><img src="${h.img}"></div>
-                    <div class="hero-detail">
-                        <b>${h.name} ★${h.star}</b>
-                        <small>POWER: ${Math.floor(h.atk * h.star).toLocaleString()}</small>
-                    </div>
-                </div>`;
+                list.innerHTML += `<div class="card ${h.grade}"><div class="card-img">${h.emoji}</div><div class="card-info"><b>${h.name} ★${h.star}</b><small>Power: ${Math.floor(h.atk*h.star).toLocaleString()}</small></div></div>`;
             });
-            document.getElementById('h-count').innerText = data.inv.length;
+            document.getElementById('txt-hcount').innerText = data.inv.length;
         },
 
         renderRank: () => {
-            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
-            const sorted = Object.keys(totalDB).map(k => ({id: k, stage: totalDB[k].stage})).sort((a,b) => b.stage - a.stage);
-            const list = document.getElementById('rank-list');
-            list.innerHTML = sorted.slice(0, 10).map((u, i) => `
-                <div class="rank-item" style="${u.id===user?'border:1px solid var(--dia)':''}">
-                    <span>${i+1}. <b>${u.id}</b></span>
-                    <span style="color:var(--gold)">STAGE ${u.stage}</span>
-                </div>`).join('');
+            const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
+            const sorted = Object.keys(all).map(k => ({id:k, s:all[k].stage})).sort((a,b)=>b.s-a.s);
+            document.getElementById('rank-list').innerHTML = sorted.slice(0,5).map((u,i)=>`<div class="stat-box" style="text-align:left; margin-bottom:5px; padding:10px;">${i+1}. <b>${u.id}</b> - Stage ${u.s}</div>`).join('');
         },
 
         buy: (type) => {
-            if(type === 'auto' && data.gold >= 3000) { data.gold -= 3000; buff.auto += 30; toast("AUTO STRIKE READY"); }
-            else if(type === 'dia' && data.gold >= 8000) { data.gold -= 8000; data.dia += 100; toast("EXCHANGED"); }
-            else toast("NOT ENOUGH GOLD");
-            sync();
+            if(type === 'auto' && data.gold >= 3000) { data.gold -= 3000; autoTime += 30; }
+            else if(type === 'dia' && data.gold >= 10000) { data.gold -= 10000; data.dia += 100; }
+            else return showToast("Lack of Gold");
+            updateUI();
         },
 
-        changeTab: (name, el) => {
+        tab: (name, el) => {
             document.querySelectorAll('.main-content > div').forEach(d => d.classList.add('hidden'));
             document.getElementById(`tab-${name}`).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
-            if(name === 'hero') Game.renderHero();
-            if(name === 'social') Game.renderRank();
+            if(name === 'hero') Engine.renderHero();
+            if(name === 'rank') Engine.renderRank();
         }
     };
 })();
 </script>
 </body>
-    </html>
+</html>
