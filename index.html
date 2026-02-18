@@ -3,263 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythic Gacha: Ultimate</title>
+    <title>Mythic Gacha Master: Masterpiece</title>
     <style>
         :root {
-            --ssr: #ffae00; --sr: #a335ee; --r: #1eff00;
-            --gold: #ffd700; --dia: #00f2ff;
-            --bg: #0a0a0c;
+            --ssr: #ffcc00; --sr: #c154ff; --r: #00d2ff;
+            --gold: #ffd700; --dia: #00f2ff; --bg: #05050a;
         }
 
         body {
-            margin: 0; background-color: var(--bg); color: white;
-            font-family: 'Pretendard', sans-serif; display: flex; justify-content: center;
+            margin: 0; background: var(--bg); color: white;
+            font-family: 'Pretendard', sans-serif; overflow: hidden;
+            display: flex; justify-content: center; height: 100vh;
         }
 
         #app {
-            width: 100%; max-width: 480px; height: 100vh;
-            display: flex; flex-direction: column; position: relative;
-            background: radial-gradient(circle at top, #1a1a2e, #0a0a0c);
+            width: 100%; max-width: 450px; display: flex; flex-direction: column;
+            background: linear-gradient(180deg, #111 0%, #000 100%);
+            position: relative; box-shadow: 0 0 100px rgba(0,242,255,0.1);
         }
 
-        /* 헤더: 자원 표시 */
+        /* 상단 바: 자원 및 레벨 */
         .status-bar {
-            display: flex; justify-content: space-around; padding: 15px;
-            background: rgba(0,0,0,0.6); border-bottom: 1px solid #333;
+            padding: 15px; background: rgba(255,255,255,0.05);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            border-bottom: 1px solid #333; backdrop-filter: blur(10px);
         }
-        .res { font-weight: bold; font-size: 0.9rem; }
-        .res.dia { color: var(--dia); }
-        .res.gold { color: var(--gold); }
+        .stat-item { background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; }
+        .lv-bar { grid-column: 1 / -1; height: 4px; background: #333; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .lv-progress { height: 100%; background: var(--dia); width: 0%; transition: 0.3s; }
 
-        /* 메인 영역 */
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
+        /* 메인 컨텐츠 구역 */
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scrollbar-width: none; }
+        .content::-webkit-scrollbar { display: none; }
 
-        /* 탭 메뉴 */
-        .nav {
-            position: absolute; bottom: 0; width: 100%; height: 60px;
-            display: flex; background: #111; border-top: 1px solid #333;
-        }
-        .nav-btn {
-            flex: 1; border: none; background: none; color: #888;
-            cursor: pointer; font-weight: bold; transition: 0.3s;
-        }
-        .nav-btn.active { color: white; background: rgba(255,255,255,0.05); }
-
-        /* 가차 연출 */
-        #gacha-screen { text-align: center; }
-        .card-container {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            margin-top: 20px; min-height: 200px;
-        }
+        /* 카드 애니메이션 */
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         .card {
-            background: #222; border-radius: 10px; overflow: hidden;
-            border: 2px solid #444; position: relative; animation: flip 0.5s ease-out;
+            background: #1a1a1a; border-radius: 15px; border: 2px solid #333;
+            overflow: hidden; position: relative; animation: cardIn 0.5s ease-out forwards;
         }
-        .card img { width: 100%; height: 120px; object-fit: cover; }
-        .card-info { padding: 8px; font-size: 0.8rem; }
-        .grade-badge { position: absolute; top: 5px; right: 5px; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        @keyframes cardIn { from { transform: scale(0.5) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        .card img { width: 100%; height: 140px; object-fit: cover; }
+        .card-grade { position: absolute; top: 5px; left: 5px; font-size: 10px; padding: 2px 6px; border-radius: 5px; font-weight: 900; }
 
-        @keyframes flip { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* 도감 스타일 */
+        .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .col-item { aspect-ratio: 1/1; border-radius: 8px; border: 1px solid #333; position: relative; overflow: hidden; }
+        .col-item.locked { filter: grayscale(1) brightness(0.3); }
+        .col-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 인벤토리 & 상점 리스트 */
-        .item-row {
-            display: flex; align-items: center; background: rgba(255,255,255,0.05);
-            margin-bottom: 8px; padding: 10px; border-radius: 8px;
+        /* 하단 네비게이션 */
+        .nav {
+            position: absolute; bottom: 0; width: 100%; height: 70px;
+            display: flex; background: rgba(10, 10, 15, 0.95); border-top: 1px solid #333;
         }
-        .item-row img { width: 40px; height: 40px; border-radius: 4px; margin-right: 12px; }
-        .item-name { flex: 1; font-size: 0.9rem; }
-        .btn-sm { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.7rem; }
-        .btn-sell { background: #e94560; color: white; }
-        .btn-buy { background: #0f3460; color: white; }
+        .nav-btn { flex: 1; border: none; background: none; color: #666; cursor: pointer; font-size: 0.75rem; transition: 0.3s; }
+        .nav-btn.active { color: var(--dia); font-weight: bold; }
 
-        /* 소환 버튼 */
-        .draw-btns { margin-top: 30px; display: flex; gap: 10px; }
-        .btn-main {
-            flex: 1; padding: 15px; border-radius: 10px; border: none;
-            font-weight: bold; cursor: pointer; background: linear-gradient(45deg, #444, #222); color: white;
-        }
-        .btn-premium { background: linear-gradient(45deg, #f09819, #edde5d); color: #000; }
+        /* 공통 버튼 */
+        .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-draw { width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
+        .btn-1 { background: #333; color: white; }
+        .btn-10 { background: linear-gradient(90deg, #ff4b2b, #ff416c); color: white; box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3); }
+
+        .title-display { text-align: center; margin-bottom: 20px; }
+        .title-badge { color: var(--ssr); font-size: 0.9rem; border: 1px solid var(--ssr); padding: 2px 10px; border-radius: 20px; }
 
         .hidden { display: none; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="status-bar">
-        <div class="res dia">💎 다이아: <span id="dia-count">1,000</span></div>
-        <div class="res gold">💰 골드: <span id="gold-count">0</span></div>
+        <div class="stat-item" style="color:var(--dia)">💎 <span id="dia">2,000</span></div>
+        <div class="stat-item" style="color:var(--gold)">💰 <span id="gold">0</span></div>
+        <div class="stat-item" style="grid-column: span 2;">Lv.<span id="lv">1</span> <small>(EXP: <span id="exp">0</span>%)</small>
+            <div class="lv-bar"><div id="lv-prog" class="lv-progress"></div></div>
+        </div>
     </div>
 
-    <div class="content">
-        <div id="tab-gacha">
-            <h2 style="text-align:center">신화의 제단</h2>
-            <div id="gacha-display" class="card-container">
-                <p style="grid-column: 1/-1; color: #666;">운명을 선택하세요...</p>
+    <div class="content" id="main-content">
+        <div id="tab-draw">
+            <div class="title-display"><span id="user-title" class="title-badge">초보 소환사</span></div>
+            <div id="draw-result" class="card-grid">
+                <p style="grid-column: span 2; text-align: center; opacity: 0.5; margin-top: 50px;">신화 속 영웅을 불러내세요.</p>
             </div>
-            <div class="draw-btns">
-                <button class="btn-main" onclick="playGacha(1)">1회 (100💎)</button>
-                <button class="btn-main btn-premium" onclick="playGacha(10)">10회 (1000💎)</button>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-draw btn-1" onclick="gacha(1)">1회 소환 (100💎)</button>
+                <button class="btn btn-draw btn-10" onclick="gacha(10)">10회 연속 소환 (1,000💎)</button>
             </div>
         </div>
 
-        <div id="tab-inventory" class="hidden">
-            <h2>보관함</h2>
-            <div id="inventory-list"></div>
+        <div id="tab-inv" class="hidden">
+            <h3>내 군단 (<span id="inv-count">0</span>)</h3>
+            <div id="inv-list"></div>
+        </div>
+
+        <div id="tab-col" class="hidden">
+            <h3>영웅 도감 (<span id="col-count">0</span>/12)</h3>
+            <div id="col-grid" class="collection-grid"></div>
         </div>
 
         <div id="tab-shop" class="hidden">
-            <h2>암시장</h2>
-            <div class="item-row">
-                <div class="item-name">💎 다이아 500개 구매</div>
-                <button class="btn-sm btn-buy" onclick="buyCurrency('dia', 500, 5000)">5,000💰</button>
-            </div>
-            <div class="item-row">
-                <div class="item-name">💎 다이아 1200개 구매</div>
-                <button class="btn-sm btn-buy" onclick="buyCurrency('dia', 1200, 10000)">10,000💰</button>
+            <h3>차원 상점</h3>
+            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
+                <p>💰 골드를 다이아로 연성합니다.</p>
+                <button class="btn btn-1" style="width:100%; margin-bottom:10px;" onclick="exchange(1000, 5000)">1,000💎 교환 (5,000💰)</button>
+                <button class="btn btn-10" style="width:100%;" onclick="exchange(5000, 20000)">5,500💎 교환 (20,000💰)</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <button class="nav-btn active" onclick="switchTab('gacha')">소환</button>
-        <button class="nav-btn" onclick="switchTab('inventory')">가방</button>
-        <button class="nav-btn" onclick="switchTab('shop')">상점</button>
+        <button class="nav-btn active" onclick="nav('draw')">🏠 소환</button>
+        <button class="nav-btn" onclick="nav('inv')">⚔️ 군단</button>
+        <button class="nav-btn" onclick="nav('col')">📖 도감</button>
+        <button class="nav-btn" onclick="nav('shop')">💎 상점</button>
     </nav>
 </div>
 
 <script>
-    /* --- 아이템 데이터베이스 (대량 추가) --- */
-    const itemDB = [
-        { id: 1, name: "대천사 루시펠", grade: "SSR", price: 5000, img: "https://loremflickr.com/200/200/angel,fantasy" },
-        { id: 2, name: "지옥의 벨리알", grade: "SSR", price: 5000, img: "https://loremflickr.com/200/200/demon,fantasy" },
-        { id: 3, name: "드래곤 슬레이어", grade: "SSR", price: 4500, img: "https://loremflickr.com/200/200/dragon,knight" },
-        { id: 4, name: "성기사 롤랑", grade: "SR", price: 1200, img: "https://loremflickr.com/200/200/paladin" },
-        { id: 5, name: "밤의 추적자", grade: "SR", price: 1000, img: "https://loremflickr.com/200/200/assassin" },
-        { id: 6, name: "엘프 궁수", grade: "SR", price: 1000, img: "https://loremflickr.com/200/200/elf,archer" },
-        { id: 7, name: "화염 마법사", grade: "SR", price: 1000, img: "https://loremflickr.com/200/200/wizard" },
-        { id: 8, name: "강철 병사", grade: "R", price: 300, img: "https://loremflickr.com/200/200/soldier" },
-        { id: 9, name: "숲의 슬라임", grade: "R", price: 200, img: "https://loremflickr.com/200/200/slime" },
-        { id: 10, name: "녹슨 칼날", grade: "R", price: 150, img: "https://loremflickr.com/200/200/sword" },
-        { id: 11, name: "해골 궁수", grade: "R", price: 250, img: "https://loremflickr.com/200/200/skeleton" },
-        { id: 12, name: "고블린 도둑", grade: "R", price: 200, img: "https://loremflickr.com/200/200/goblin" }
+    /* --- 아이템 및 시스템 데이터 --- */
+    const db = [
+        {id:0, name:"루시퍼", grade:"SSR", price:10000, img:"https://loremflickr.com/300/400/demon"},
+        {id:1, name:"가브리엘", grade:"SSR", price:10000, img:"https://loremflickr.com/300/400/angel"},
+        {id:2, name:"바하무트", grade:"SSR", price:9000, img:"https://loremflickr.com/300/400/dragon"},
+        {id:3, name:"아테나", grade:"SR", price:3000, img:"https://loremflickr.com/300/400/woman,warrior"},
+        {id:4, name:"오딘", grade:"SR", price:3000, img:"https://loremflickr.com/300/400/king"},
+        {id:5, name:"아서", grade:"SR", price:2500, img:"https://loremflickr.com/300/400/knight"},
+        {id:6, name:"멀린", grade:"SR", price:2500, img:"https://loremflickr.com/300/400/wizard"},
+        {id:7, name:"페가수스", grade:"R", price:1000, img:"https://loremflickr.com/300/400/horse"},
+        {id:8, name:"미노타우르스", grade:"R", price:900, img:"https://loremflickr.com/300/400/monster"},
+        {id:9, name:"켄타우로스", grade:"R", price:900, img:"https://loremflickr.com/300/400/archer"},
+        {id:10, name:"해골병사", grade:"R", price:800, img:"https://loremflickr.com/300/400/skeleton"},
+        {id:11, name:"슬라임", grade:"R", price:700, img:"https://loremflickr.com/300/400/slime"}
     ];
 
-    // 게임 상태
-    let state = JSON.parse(localStorage.getItem('gacha_v3_state')) || {
-        dia: 2000,
-        gold: 0,
-        inventory: []
+    let user = JSON.parse(localStorage.getItem('mythic_vfinal')) || {
+        dia: 2000, gold: 0, exp: 0, lv: 1,
+        inv: [], col: []
     };
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    /* --- 사운드 함수 --- */
-    function beep(freq, dur) {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.value = freq;
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-        osc.start(); osc.stop(audioCtx.currentTime + dur);
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function sfx(f, d, t='sine') {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = t; o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+d);
+        o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
     }
 
-    /* --- 화면 전환 --- */
-    function switchTab(tabId) {
-        document.querySelectorAll('.content > div').forEach(el => el.classList.add('hidden'));
-        document.getElementById('tab-' + tabId).classList.remove('hidden');
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    /* --- 내비게이션 --- */
+    function nav(t) {
+        document.querySelectorAll('.content > div').forEach(d => d.classList.add('hidden'));
+        document.getElementById('tab-'+t).classList.remove('hidden');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        if(tabId === 'inventory') renderInventory();
+        if(t === 'inv') renderInv();
+        if(t === 'col') renderCol();
     }
 
-    /* --- 뽑기 로직 --- */
-    function playGacha(count) {
-        const cost = count * 100;
-        if(state.dia < cost) return alert("다이아가 부족합니다!");
-
-        state.dia -= cost;
-        const display = document.getElementById('gacha-display');
-        display.innerHTML = '';
-
-        for(let i=0; i<count; i++) {
+    /* --- 핵심 로직 --- */
+    function gacha(n) {
+        if(user.dia < n*100) return alert("다이아가 부족합니다!");
+        user.dia -= n*100;
+        const resDiv = document.getElementById('draw-result');
+        resDiv.innerHTML = '';
+        
+        for(let i=0; i<n; i++) {
             setTimeout(() => {
-                const result = pullItem();
-                state.inventory.push({...result, uuid: Date.now() + Math.random()});
-                addCardToDisplay(result);
-                beep(result.grade === 'SSR' ? 880 : 440, 0.2);
-                save();
-                updateTopBar();
-            }, i * 100);
+                const item = pull();
+                user.inv.push({...item, uid: Math.random()});
+                if(!user.col.includes(item.id)) user.col.push(item.id);
+                
+                // 경험치 및 칭호 체크
+                user.exp += (item.grade === 'SSR' ? 20 : (item.grade === 'SR' ? 10 : 5));
+                if(user.exp >= 100) { user.lv++; user.exp = 0; sfx(880, 0.5, 'square'); }
+                
+                renderCard(item, resDiv);
+                if(item.grade === 'SSR') { sfx(1200, 0.6, 'square'); document.getElementById('app').classList.add('shake'); setTimeout(()=>document.getElementById('app').classList.remove('shake'), 400); }
+                else sfx(440, 0.1);
+                
+                save(); updateUI();
+            }, i * 150);
         }
     }
 
-    function pullItem() {
-        const rand = Math.random() * 100;
-        if(rand < 3) return itemDB.filter(i => i.grade === 'SSR')[Math.floor(Math.random()*3)];
-        if(rand < 20) return itemDB.filter(i => i.grade === 'SR')[Math.floor(Math.random()*4)];
-        return itemDB.filter(i => i.grade === 'R')[Math.floor(Math.random()*5)];
+    function pull() {
+        const r = Math.random() * 100;
+        const gradePool = r < 5 ? 'SSR' : (r < 25 ? 'SR' : 'R');
+        const items = db.filter(i => i.grade === gradePool);
+        return items[Math.floor(Math.random()*items.length)];
     }
 
-    function addCardToDisplay(item) {
-        const div = document.createElement('div');
-        div.className = `card`;
-        div.style.borderColor = `var(--${item.grade.toLowerCase()})`;
-        div.innerHTML = `
-            <span class="grade-badge" style="background:var(--${item.grade.toLowerCase()})">${item.grade}</span>
-            <img src="${item.img}" alt="${item.name}">
-            <div class="card-info"><b>${item.name}</b></div>
-        `;
-        document.getElementById('gacha-display').appendChild(div);
+    function renderCard(item, target) {
+        const d = document.createElement('div');
+        d.className = 'card'; d.style.borderColor = `var(--${item.grade.toLowerCase()})`;
+        d.innerHTML = `<span class="card-grade" style="background:var(--${item.grade.toLowerCase()})">${item.grade}</span><img src="${item.img}?sig=${Math.random()}"><div style="padding:8px; font-size:12px; text-align:center;">${item.name}</div>`;
+        target.appendChild(d);
     }
 
-    /* --- 인벤토리 & 판매 --- */
-    function renderInventory() {
-        const list = document.getElementById('inventory-list');
-        list.innerHTML = state.inventory.length === 0 ? '<p>가방이 비었습니다.</p>' : '';
-        state.inventory.forEach((item, index) => {
+    /* --- 인벤토리 및 도감 --- */
+    function renderInv() {
+        const list = document.getElementById('inv-list');
+        list.innerHTML = '';
+        document.getElementById('inv-count').innerText = user.inv.length;
+        user.inv.forEach((item, idx) => {
             const row = document.createElement('div');
-            row.className = 'item-row';
-            row.innerHTML = `
-                <img src="${item.img}">
-                <div class="item-name">
-                    <b style="color:var(--${item.grade.toLowerCase()})">[${item.grade}]</b> ${item.name}<br>
-                    <small>가치: ${item.price}💰</small>
-                </div>
-                <button class="btn-sm btn-sell" onclick="sellItem(${index})">판매</button>
-            `;
+            row.style = "display:flex; align-items:center; background:#222; margin-bottom:10px; padding:10px; border-radius:10px;";
+            row.innerHTML = `<img src="${item.img}" style="width:40px; height:40px; border-radius:5px; margin-right:10px;">
+                <div style="flex:1; font-size:13px;"><b style="color:var(--${item.grade.toLowerCase()})">${item.name}</b><br><small>${item.price}💰</small></div>
+                <button class="btn btn-1" style="padding:5px 10px;" onclick="sell(${idx})">판매</button>`;
             list.appendChild(row);
         });
     }
 
-    function sellItem(index) {
-        const item = state.inventory[index];
-        state.gold += item.price;
-        state.inventory.splice(index, 1);
-        save();
-        updateTopBar();
-        renderInventory();
-        beep(600, 0.1);
+    function renderCol() {
+        const grid = document.getElementById('col-grid');
+        grid.innerHTML = '';
+        document.getElementById('col-count').innerText = user.col.length;
+        db.forEach(item => {
+            const locked = !user.col.includes(item.id);
+            const div = document.createElement('div');
+            div.className = `col-item ${locked ? 'locked' : ''}`;
+            div.innerHTML = `<img src="${item.img}">`;
+            grid.appendChild(div);
+        });
     }
 
-    /* --- 상점 --- */
-    function buyCurrency(type, amount, price) {
-        if(state.gold < price) return alert("골드가 부족합니다!");
-        state.gold -= price;
-        state[type] += amount;
-        save();
-        updateTopBar();
-        alert(`${amount} 다이아를 구매했습니다!`);
+    function sell(idx) {
+        user.gold += user.inv[idx].price;
+        user.inv.splice(idx, 1);
+        save(); updateUI(); renderInv();
+        sfx(600, 0.1);
     }
 
-    /* --- 시스템 --- */
-    function updateTopBar() {
-        document.getElementById('dia-count').innerText = state.dia.toLocaleString();
-        document.getElementById('gold-count').innerText = state.gold.toLocaleString();
+    function exchange(d, g) {
+        if(user.gold < g) return alert("골드가 부족합니다!");
+        user.gold -= g; user.dia += d;
+        save(); updateUI();
+        sfx(1000, 0.3);
     }
-    function save() { localStorage.setItem('gacha_v3_state', JSON.stringify(state)); }
-    updateTopBar();
+
+    function updateUI() {
+        document.getElementById('dia').innerText = user.dia.toLocaleString();
+        document.getElementById('gold').innerText = user.gold.toLocaleString();
+        document.getElementById('lv').innerText = user.lv;
+        document.getElementById('exp').innerText = user.exp;
+        document.getElementById('lv-prog').style.width = user.exp + '%';
+        
+        // 칭호 로직
+        let title = "초보 소환사";
+        if(user.col.length >= 12) title = "🔱 신화의 정복자";
+        else if(user.lv >= 10) title = "고급 마법사";
+        else if(user.lv >= 5) title = "숙련된 모험가";
+        document.getElementById('user-title').innerText = title;
+    }
+
+    function save() { localStorage.setItem('mythic_vfinal', JSON.stringify(user)); }
+    updateUI();
 </script>
-
 </body>
-  </html>
+</html>
