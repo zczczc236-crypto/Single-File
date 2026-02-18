@@ -3,382 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>Mythic Overlord: Visual Saga</title>
+    <title>Mythic Overlord: Full Saga</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+KR:wght@300;700&display=swap');
         :root {
-            --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #0a0a12;
-            --gold: #ffd700; --dia: #00d2ff; --panel: rgba(255, 255, 255, 0.05);
-            --text: #e0e0e0;
+            --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #050508;
+            --gold: #ffd700; --dia: #00d2ff; --panel: rgba(255, 255, 255, 0.08);
+            --border: #333;
         }
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans KR', sans-serif; }
+        body { margin: 0; background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
         
-        #app { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e1e30 0%, #0a0a12 100%); position: relative; border-left: 1px solid #333; border-right: 1px solid #333; }
+        #app { width: 100%; max-width: 480px; height: 100%; background: radial-gradient(circle at top, #1a1a2e 0%, #050508 100%); display: flex; flex-direction: column; position: relative; border: 1px solid var(--border); }
 
-        .header { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: rgba(0,0,0,0.85); border-bottom: 2px solid #333; z-index: 10; }
-        .stat-box { background: var(--panel); padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #444; }
-        .stat-box div { font-size: 0.7rem; color: #888; margin-bottom: 2px; }
-        .stat-box span { font-size: 0.85rem; font-weight: bold; }
+        /* Header Info */
+        .header { padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(0,0,0,0.95); border-bottom: 2px solid #444; z-index: 10; }
+        .stat-box { background: var(--panel); padding: 6px; border-radius: 8px; text-align: center; border: 1px solid #444; }
+        .stat-box div { font-size: 9px; color: #888; font-family: 'Orbitron'; margin-bottom: 2px; }
+        .stat-box span { font-size: 12px; font-weight: bold; font-family: 'Orbitron'; }
 
-        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scrollbar-width: none; }
+        /* Main Scrollable Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
 
-        .battle-stage { background: var(--panel); border-radius: 25px; border: 2px solid #444; padding: 25px 15px; text-align: center; margin-bottom: 20px; }
-        .monster-box { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; margin: 10px 0; }
-        .monster-img { max-width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-
-        .hp-container { height: 20px; background: #222; border-radius: 10px; border: 1px solid #555; overflow: hidden; position: relative; margin: 15px 0; }
-        .hp-bar { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: width 0.1s linear; }
-        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 0.7rem; line-height: 20px; font-weight: bold; text-shadow: 1px 1px 2px black; color: white; }
-
-        .card { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 12px; display: flex; align-items: center; margin-bottom: 12px; }
-        .hero-icon { width: 60px; height: 60px; border-radius: 12px; background: #000; overflow: hidden; margin-right: 15px; border: 2px solid #444; flex-shrink: 0; }
-        .hero-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-info { flex: 1; }
-        .hero-info b { font-size: 0.95rem; display: block; margin-bottom: 4px; }
-        .hero-info small { color: #888; font-size: 0.75rem; }
-
-        .nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: #05050a; display: flex; border-top: 2px solid #333; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; cursor: pointer; }
-        .nav-item.active { color: var(--dia); }
-        .nav-item i { font-style: normal; font-size: 1.4rem; margin-bottom: 3px; }
-
-        .btn { border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); }
-        .btn-hit { width: 100%; padding: 15px; font-size: 1.1rem; background: linear-gradient(135deg, #ff416c, #ff4b2b); }
-        .btn-buy { background: var(--gold); color: black; padding: 6px 12px; font-size: 0.75rem; }
-        .btn-sm { padding: 5px 10px; font-size: 0.7rem; background: #444; }
-
-        .book-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .book-item { aspect-ratio: 1; background: #111; border-radius: 12px; border: 1px solid #222; overflow: hidden; opacity: 0.2; filter: grayscale(1); }
-        .book-item img { width: 100%; height: 100%; object-fit: cover; }
-        .book-item.active { opacity: 1; filter: grayscale(0); border-color: var(--ssr); }
-
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-        #toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dia); color: black; padding: 10px 20px; border-radius: 20px; font-weight: bold; opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; }
-        .hidden { display: none !important; }
-        .shake { animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(0,0); } }
+        /* Battle Stage */
+        .stage-card { background: var(--panel); border-radius: 20px; border: 1px solid #555; padding: 20px; text-align: center; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .monster-box { width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .monster-img { max-width: 200px; max-height: 200px; filter: drop-shadow(0 0 25px rgba(255,0,0,0.4)); transition: transform 0.05s; }
         
-        .color-sr { color: var(--sr); }
-        .color-ssr { color: var(--ssr); }
-        .color-mythic { color: var(--mythic); text-shadow: 0 0 5px var(--mythic); }
+        .hp-outer { height: 24px; background: #000; border-radius: 12px; border: 1px solid #666; overflow: hidden; position: relative; margin: 15px 0; }
+        .hp-inner { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: width 0.1s; }
+        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 22px; font-weight: bold; font-family: 'Orbitron'; text-shadow: 1px 1px 2px #000; }
+
+        /* Hero Cards */
+        .card { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid #555; position: relative; }
+        .card.MYTHIC { border-left-color: var(--mythic); background: linear-gradient(90deg, rgba(255,71,87,0.1) 0%, rgba(255,255,255,0.05) 100%); }
+        .card.SSR { border-left-color: var(--ssr); }
+        .hero-img { width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444; overflow: hidden; margin-right: 12px; }
+        .hero-img img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-detail { flex: 1; }
+        .hero-detail b { font-size: 14px; display: block; color: #eee; }
+        .hero-detail small { font-size: 11px; color: #999; font-family: 'Orbitron'; }
+
+        /* Navigation */
+        .nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: #000; display: flex; border-top: 1px solid #333; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #555; cursor: pointer; }
+        .nav-item.active { color: var(--dia); border-top: 2px solid var(--dia); background: #0a0a15; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
+
+        /* UI Elements */
+        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.1s; }
+        .btn:active { transform: scale(0.95); }
+        .btn-main { width: 100%; padding: 18px; font-size: 20px; background: linear-gradient(135deg, #ff416c, #ff4b2b); font-family: 'Orbitron'; box-shadow: 0 5px 20px rgba(255,65,108,0.4); }
+        .btn-sm { padding: 6px 12px; font-size: 11px; background: var(--panel); border: 1px solid #555; }
+        .btn-buy { background: var(--gold); color: #000; padding: 8px 15px; font-size: 12px; }
+
+        /* Social/Ranking */
+        .rank-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; }
+
+        /* Toasts & Effects */
+        #toast { position: fixed; top: 12%; left: 50%; transform: translateX(-50%); background: var(--dia); color: #000; padding: 12px 25px; border-radius: 25px; font-weight: bold; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 9999; }
+        .hidden { display: none !important; }
+        .crit { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-size: 24px; font-weight: bold; animation: floatUp 0.6s ease-out forwards; pointer-events: none; z-index: 100; }
+        @keyframes floatUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-80px) rotate(10deg); } }
     </style>
 </head>
 <body>
 
-<div id="toast">메시지</div>
+<div id="toast"></div>
 
-<div id="auth-screen" class="overlay">
-    <h1 style="color:var(--dia); margin:0; letter-spacing: 2px;">MYTHIC OVERLORD</h1>
-    <p style="color:#666; font-size: 0.8rem; margin-bottom: 30px;">VISUAL SAGA EDITION</p>
-    <input type="text" id="join-id" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:10px;" placeholder="영주 아이디">
-    <input type="password" id="join-pw" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:20px;" placeholder="비밀번호">
-    <button class="btn btn-hit" onclick="Game.auth()">제국 접속</button>
+<div id="login-screen" class="overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
+    <h1 style="font-family:'Orbitron'; color:var(--dia); font-size:32px; margin:0;">OVERLORD</h1>
+    <p style="color:#666; font-size:12px; margin-bottom:40px;">UNLEASH THE MYTHIC SAGA</p>
+    <input type="text" id="uid" style="width:100%; padding:16px; background:#111; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:12px;" placeholder="EMPIRE ID">
+    <input type="password" id="upw" style="width:100%; padding:16px; background:#111; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:24px;" placeholder="PASSWORD">
+    <button class="btn btn-main" onclick="Game.start()">INITIALIZE</button>
 </div>
 
 <div id="app" class="hidden">
     <header class="header">
-        <div class="stat-box"><div>💰 골드</div><span id="txt-gold" style="color:var(--gold)">0</span></div>
-        <div class="stat-box"><div>💎 다이아</div><span id="txt-dia" style="color:var(--dia)">0</span></div>
-        <div class="stat-box"><div>⚔️ 투력</div><span id="txt-atk" style="color:#00ff88">0</span></div>
+        <div class="stat-box"><div>GOLD</div><span id="gold" style="color:var(--gold)">0</span></div>
+        <div class="stat-box"><div>DIAMOND</div><span id="dia" style="color:var(--dia)">0</span></div>
+        <div class="stat-box"><div>ATK</div><span id="atk" style="color:#00ff88">0</span></div>
     </header>
 
     <div class="main-content">
         <div id="tab-battle">
-            <div class="battle-stage" id="stage-box">
-                <div style="color:var(--ssr); font-weight:bold; font-size:0.8rem; margin-bottom:5px;">STAGE <span id="txt-stage">1</span></div>
-                <div class="monster-box" id="monster-icon"></div>
-                <div class="hp-container">
-                    <div id="hp-bar" class="hp-bar"></div>
-                    <div id="hp-text" class="hp-text">0 / 0</div>
+            <div class="stage-card" id="b-zone">
+                <div style="font-family:'Orbitron'; color:var(--ssr); font-size:13px;">STAGE <span id="stage-num">1</span></div>
+                <div class="monster-box" id="monster-render"></div>
+                <div class="hp-outer">
+                    <div id="hp-bar" class="hp-inner"></div>
+                    <div id="hp-txt" class="hp-text">0 / 0</div>
                 </div>
-                <button class="btn btn-hit" onmousedown="Game.attack()">공격 개시</button>
+                <button class="btn btn-main" onmousedown="Game.hit()">STRIKE</button>
             </div>
-            <div id="list-artis" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
+            <div id="artis-info" style="font-size:11px; color:#888; text-align:center; margin-bottom:10px;"></div>
+            <div id="artis-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
         </div>
 
         <div id="tab-draw" class="hidden">
-            <h3 style="text-align:center;">🔮 영웅 소환</h3>
-            <div id="draw-result" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; background:rgba(255,255,255,0.03); padding:15px; border-radius:20px; min-height:100px; margin-bottom:20px;"></div>
-            <button class="btn btn-hit" onclick="Game.summon(10)">10회 소환 (1,000💎)</button>
+            <h2 style="text-align:center; font-family:'Orbitron'; color:var(--dia);">SUMMON</h2>
+            <div id="draw-result" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; min-height:180px; margin-bottom:20px;"></div>
+            <button class="btn btn-main" onclick="Game.summon()">10X SUMMON (1,000💎)</button>
         </div>
 
         <div id="tab-hero" class="hidden">
-            <div class="card" style="border:1px dashed var(--dia);">
-                <div class="hero-info">
-                    <b>🔨 전설 제련소 (+<span id="txt-wp">0</span>)</b>
-                    <small>성공률 35% | 보호석 보유: <span id="txt-prot">0</span></small>
-                </div>
-                <button class="btn btn-buy" onclick="Game.refine()">제련 (2,000💰)</button>
-            </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h4 style="margin:0;">⚔️ 나의 영웅들 (<span id="txt-hero-cnt">0</span>)</h4>
-                <button class="btn btn-sm" onclick="Game.autoEvolve()">일괄 합성</button>
+                <h3 style="margin:0;">LEGION (<span id="h-count">0</span>)</h3>
+                <button class="btn btn-sm" onclick="Game.autoMerge()">AUTO MERGE</button>
             </div>
-            <div id="list-heroes"></div>
+            <div id="hero-list"></div>
         </div>
 
-        <div id="tab-book" class="hidden">
-            <h3 style="text-align:center;">📖 제국 도감</h3>
-            <div id="grid-book" class="book-grid"></div>
+        <div id="tab-social" class="hidden">
+            <h3 style="font-family:'Orbitron'; text-align:center;">HALL OF FAME</h3>
+            <div id="rank-list" style="margin-bottom:30px;"></div>
+            
+            <h3 style="font-family:'Orbitron'; text-align:center;">PLUNDER ID</h3>
+            <div class="card" style="border-left-color:var(--mythic);">
+                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:#fff; padding:10px;" placeholder="Target User ID">
+                <button class="btn btn-buy" style="background:var(--mythic); color:#fff;" onclick="Game.pvp()">ATTACK</button>
+            </div>
+            <p id="pvp-result" style="text-align:center; font-size:12px; margin-top:10px;"></p>
         </div>
 
         <div id="tab-shop" class="hidden">
-            <h3 style="text-align:center;">🛒 제국 상점</h3>
+            <h3 style="font-family:'Orbitron'; text-align:center;">EMPIRE SHOP</h3>
             <div class="card">
-                <div class="hero-info"><b>💎 다이아 환전</b><small>8,000💰 ➔ 100💎</small></div>
-                <button class="btn btn-buy" onclick="Game.buyShop('dia')">환전</button>
+                <div class="hero-detail"><b>AUTO STRIKE</b><small>30s Auto Attack (Own: <span id="auto-time">0</span>s)</small></div>
+                <button class="btn btn-buy" onclick="Game.buy('auto')">3,000💰</button>
             </div>
             <div class="card">
-                <div class="hero-info"><b>🛡️ 제련 보호석</b><small>강화 실패 방지 (15,000💰)</small></div>
-                <button class="btn btn-buy" onclick="Game.buyShop('prot')">구매</button>
+                <div class="hero-detail"><b>DIAMOND EXCHANGE</b><small>Convert Gold to 100💎</small></div>
+                <button class="btn btn-buy" onclick="Game.buy('dia')">8,000💰</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="Game.changeTab('battle', this)"><i>⚔️</i>전투</div>
-        <div class="nav-item" onclick="Game.changeTab('draw', this)"><i>🔮</i>소환</div>
-        <div class="nav-item" onclick="Game.changeTab('hero', this)"><i>👤</i>군단</div>
-        <div class="nav-item" onclick="Game.changeTab('book', this)"><i>📖</i>도감</div>
-        <div class="nav-item" onclick="Game.changeTab('shop', this)"><i>🛒</i>상점</div>
+        <div class="nav-item active" onclick="Game.changeTab('battle', this)"><i>⚔️</i>BATTLE</div>
+        <div class="nav-item" onclick="Game.changeTab('draw', this)"><i>🔮</i>SUMMON</div>
+        <div class="nav-item" onclick="Game.changeTab('hero', this)"><i>🛡️</i>LEGION</div>
+        <div class="nav-item" onclick="Game.changeTab('social', this)"><i>🏆</i>RANK</div>
+        <div class="nav-item" onclick="Game.changeTab('shop', this)"><i>🛒</i>SHOP</div>
     </nav>
 </div>
 
 <script>
 /**
- * MYTHIC OVERLORD - FINAL STABLE ENGINE
+ * MYTHIC OVERLORD: THE FULL SAGA ENGINE
  */
 const Game = (() => {
     let user = "";
-    let state = {
-        gold: 0, dia: 3000, stage: 1, wp: 0, prot: 0,
-        inv: [], book: [], artis: { 1:0, 2:0, 3:0 },
-        mHp: 2000, maxHp: 2000
-    };
-
-    const HERO_DB = [];
-    const AI_PROMPTS = {
-        SR: "fantasy+knight+warrior+portrait",
-        SSR: "magical+wizard+elf+glowing+portrait",
-        MYTHIC: "godlike+armored+king+celestial+portrait"
-    };
-
-    // Initialize Hero Database with AI Image Mappings
-    for(let i=1; i<=30; i++) {
-        let g = i > 25 ? "MYTHIC" : (i > 15 ? "SSR" : "SR");
-        HERO_DB.push({
-            id: i,
-            name: `${g} Hero #${i}`,
-            grade: g,
-            img: `https://image.pollinations.ai/prompt/${AI_PROMPTS[g]}+v${i}?width=150&height=150&nologo=true`,
-            atk: i * 150 + (i > 15 ? 3000 : 300)
+    let data = { gold: 3000, dia: 2000, stage: 1, inv: [], book: [], artis: {1:0, 2:0, 3:0}, mHp: 2000, maxHp: 2000 };
+    let buff = { auto: 0 };
+    
+    const DB = [];
+    const PROMPTS = { SR: "armored+knight", SSR: "glowing+mage", MYTHIC: "godlike+angelic+warrior" };
+    
+    // Build Global Hero Database with Static Seeds
+    for(let i=1; i<=40; i++) {
+        let g = i > 35 ? "MYTHIC" : (i > 20 ? "SSR" : "SR");
+        DB.push({
+            id: i, name: `${g} Overlord #${i}`, grade: g,
+            img: `https://image.pollinations.ai/prompt/fantasy+${PROMPTS[g]}+portrait?width=150&height=150&seed=${i+777}&nologo=true`,
+            atk: i * 250 + (i > 20 ? 8000 : 800)
         });
     }
 
-    const MONSTERS = ["slime", "skeleton", "orc", "spider", "demon", "dragon", "beholder", "golem"];
+    const MONSTERS = ["demon", "dragon", "beholder", "lich", "kraken", "golem", "hydra"];
 
-    const save = () => {
-        if(!user) return;
-        localStorage.setItem(`mo_saga_v3_${user}`, JSON.stringify(state));
-    };
-
-    const showToast = (m) => {
+    const toast = (m) => {
         const t = document.getElementById('toast');
         t.innerText = m; t.style.opacity = 1;
         setTimeout(() => t.style.opacity = 0, 1500);
     };
 
     const getAtk = () => {
-        let base = state.inv.reduce((s, h) => s + (h.atk * h.star), 0);
-        let bookBonus = 1 + (state.book.length * 0.05);
-        let artiBonus = 1 + (state.artis[1] * 0.5);
-        return (base + (state.wp * 1200) + 100) * bookBonus * artiBonus;
+        let base = data.inv.reduce((s, h) => s + (h.atk * h.star), 0);
+        let bookBonus = 1 + (data.book.length * 0.05);
+        let artiBonus = 1 + (data.artis[1] * 0.4);
+        return (base + 100) * bookBonus * artiBonus;
+    };
+
+    const save = () => {
+        if(!user) return;
+        const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
+        totalDB[user] = data;
+        localStorage.setItem('mo_full_db', JSON.stringify(totalDB));
     };
 
     const updateMonster = () => {
-        const mIdx = (state.stage - 1) % MONSTERS.length;
-        const url = `https://image.pollinations.ai/prompt/fantasy+${MONSTERS[mIdx]}+monster+dark+background?width=250&height=250&nologo=true`;
-        document.getElementById('monster-icon').innerHTML = `<img src="${url}" class="monster-img">`;
+        const m = MONSTERS[data.stage % MONSTERS.length];
+        const url = `https://image.pollinations.ai/prompt/fantasy+${m}+monster+boss+cinematic?width=300&height=300&seed=${data.stage+99}&nologo=true`;
+        document.getElementById('monster-render').innerHTML = `<img src="${url}" class="monster-img" id="m-img">`;
     };
 
-    const render = {
-        battle: () => {
-            const area = document.getElementById('list-artis');
-            area.innerHTML = '';
-            [1,2,3].forEach(i => {
-                area.innerHTML += `<div class="stat-box" style="font-size:0.7rem">🏺 유물 Lv.${state.artis[i]}</div>`;
-            });
-        },
-        hero: () => {
-            const list = document.getElementById('list-heroes');
-            list.innerHTML = '';
-            state.inv.sort((a,b) => (b.atk*b.star) - (a.atk*a.star)).forEach(h => {
-                list.innerHTML += `
-                    <div class="card" style="border-color:${h.grade==='MYTHIC'?'#ff4757':'#444'}">
-                        <div class="hero-icon"><img src="${h.img}" loading="lazy"></div>
-                        <div class="hero-info">
-                            <b class="color-${h.grade.toLowerCase()}">${h.name} [★${h.star}]</b>
-                            <small>ATK: ${Math.floor(h.atk * h.star).toLocaleString()}</small>
-                        </div>
-                        <button class="btn btn-sm" onclick="Game.sellHero(${h.uid})">판매</button>
-                    </div>`;
-            });
-            document.getElementById('txt-hero-cnt').innerText = state.inv.length;
-            document.getElementById('txt-wp').innerText = state.wp;
-            document.getElementById('txt-prot').innerText = state.prot;
-        },
-        book: () => {
-            const grid = document.getElementById('grid-book');
-            grid.innerHTML = '';
-            HERO_DB.forEach(h => {
-                const active = state.book.includes(h.id);
-                grid.innerHTML += `<div class="book-item ${active?'active':''}"><img src="${h.img}" loading="lazy"></div>`;
-            });
-        }
+    const sync = () => {
+        document.getElementById('gold').innerText = Math.floor(data.gold).toLocaleString();
+        document.getElementById('dia').innerText = Math.floor(data.dia).toLocaleString();
+        document.getElementById('atk').innerText = Math.floor(getAtk()).toLocaleString();
+        document.getElementById('stage-num').innerText = data.stage;
+        document.getElementById('auto-time').innerText = buff.auto;
+        
+        const per = Math.max(0, (data.mHp / data.maxHp) * 100);
+        document.getElementById('hp-bar').style.width = per + "%";
+        document.getElementById('hp-txt').innerText = `${Math.floor(data.mHp).toLocaleString()} / ${data.maxHp.toLocaleString()}`;
+        save();
     };
 
     return {
-        auth: () => {
-            const id = document.getElementById('join-id').value.trim();
-            const pw = document.getElementById('join-pw').value.trim();
-            if(!id || !pw) return alert("계정 정보를 입력하세요.");
-            
+        start: () => {
+            const id = document.getElementById('uid').value.trim();
+            if(!id) return alert("ENTER ID");
             user = id;
-            const saved = localStorage.getItem(`mo_saga_v3_${id}`);
-            if(saved) state = JSON.parse(saved);
+            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
+            if(totalDB[id]) data = totalDB[id];
             
-            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            Game.updateUI();
             updateMonster();
-            
+            sync();
+
+            // Core Loop
             setInterval(() => {
-                Game.doDamage(getAtk() * 0.1, false);
+                if(buff.auto > 0) { Game.hit(getAtk() * 0.5); buff.auto--; sync(); }
+                Game.hit(getAtk() * 0.05); // Idle Damage
             }, 1000);
         },
 
-        attack: () => {
-            Game.doDamage(getAtk(), true);
-            const box = document.getElementById('stage-box');
-            box.style.transform = "scale(0.98)";
-            setTimeout(() => box.style.transform = "scale(1)", 50);
-        },
-
-        doDamage: (dmg, isManual) => {
-            state.mHp -= dmg;
-            if(state.mHp <= 0) {
-                state.gold += (1000 + (state.stage * 250)) * (1 + (state.artis[2]*0.7));
-                if(Math.random() < 0.15) {
-                    state.artis[Math.floor(Math.random()*3)+1]++;
-                    showToast("🏺 유물의 공명을 느낍니다!");
+        hit: (forced) => {
+            const dmg = forced || getAtk();
+            data.mHp -= dmg;
+            
+            if(!forced) { // Manual Hit Effects
+                const mImg = document.getElementById('m-img');
+                if(mImg) {
+                    mImg.style.transform = "scale(0.92) translateY(5px)";
+                    setTimeout(() => mImg.style.transform = "scale(1)", 50);
                 }
-                state.stage++;
-                state.maxHp = Math.floor(2000 * Math.pow(1.25, state.stage-1));
-                state.mHp = state.maxHp;
+                // Crit Visual
+                if(Math.random() < 0.2) {
+                    const c = document.createElement('div');
+                    c.className = 'crit';
+                    c.innerText = 'CRITICAL!';
+                    c.style.left = (Math.random()*60 + 20) + "%";
+                    c.style.top = "40%";
+                    document.getElementById('b-zone').appendChild(c);
+                    setTimeout(() => c.remove(), 600);
+                }
+            }
+
+            if(data.mHp <= 0) {
+                data.gold += (1000 * data.stage) * (1 + data.artis[2] * 0.5);
+                if(Math.random() < 0.15) {
+                    const r = Math.floor(Math.random()*3)+1;
+                    data.artis[r]++;
+                    toast("🏺 ARTIFACT RESONANCE!");
+                }
+                data.stage++;
+                data.maxHp = Math.floor(2000 * Math.pow(1.28, data.stage));
+                data.mHp = data.maxHp;
                 updateMonster();
-                save();
             }
-            Game.updateUI();
+            sync();
         },
 
-        summon: (n) => {
-            if(state.dia < 1000) return showToast("다이아 부족!");
-            state.dia -= 1000;
-            const resArea = document.getElementById('draw-result');
-            resArea.innerHTML = '';
-            for(let i=0; i<n; i++) {
-                const pick = HERO_DB[Math.floor(Math.random() * HERO_DB.length)];
-                const newHero = {...pick, uid: Date.now() + Math.random(), star: 1};
-                state.inv.push(newHero);
-                if(!state.book.includes(pick.id)) state.book.push(pick.id);
-                resArea.innerHTML += `<div class="book-item active"><img src="${pick.img}"></div>`;
+        summon: () => {
+            if(data.dia < 1000) return toast("INSUFFICIENT DIAMOND");
+            data.dia -= 1000;
+            const res = document.getElementById('draw-result');
+            res.innerHTML = '';
+            for(let i=0; i<10; i++) {
+                const pick = DB[Math.floor(Math.random() * DB.length)];
+                data.inv.push({...pick, uid: Date.now() + Math.random(), star: 1});
+                if(!data.book.includes(pick.id)) data.book.push(pick.id);
+                res.innerHTML += `<div style="width:100%; aspect-ratio:1; border-radius:5px; overflow:hidden; border:1px solid #555;"><img src="${pick.img}" style="width:100%; height:100%; object-fit:cover;"></div>`;
             }
-            save();
-            Game.updateUI();
+            sync();
         },
 
-        autoEvolve: () => {
+        autoMerge: () => {
             let evolved = false;
-            let map = {};
-            state.inv.forEach(h => {
-                if(!map[h.id]) map[h.id] = [];
-                map[h.id].push(h);
-            });
-
-            for(let id in map) {
-                while(map[id].length >= 2) {
-                    let h1 = map[id].pop();
-                    let h2 = map[id].pop();
-                    h1.star += 1;
-                    h1.atk *= 1.5;
-                    state.inv = state.inv.filter(x => x.uid !== h2.uid);
+            let groups = {};
+            data.inv.forEach(h => { if(!groups[h.id]) groups[h.id] = []; groups[h.id].push(h); });
+            for(let id in groups) {
+                while(groups[id].length >= 2) {
+                    const h1 = groups[id].pop();
+                    const h2 = groups[id].pop();
+                    h1.star++;
+                    data.inv = data.inv.filter(x => x.uid !== h2.uid);
                     evolved = true;
                 }
             }
-            if(evolved) {
-                showToast("군단 합성 완료!");
-                render.hero();
-                save();
-                Game.updateUI();
+            if(evolved) { toast("LEGION EVOLVED"); Game.renderHero(); sync(); }
+        },
+
+        pvp: () => {
+            const target = document.getElementById('target-id').value.trim();
+            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
+            if(!totalDB[target] || target === user) return toast("INVALID TARGET");
+            
+            const myAtk = getAtk();
+            const opAtk = totalDB[target].stage * 15000; // NPC/Stat based defense
+            
+            const log = document.getElementById('pvp-result');
+            if(myAtk > opAtk) {
+                const steal = Math.floor(totalDB[target].gold * 0.1);
+                data.gold += steal;
+                totalDB[target].gold -= steal;
+                localStorage.setItem('mo_full_db', JSON.stringify(totalDB));
+                log.innerText = `SUCCESS! STOLE ${steal.toLocaleString()} GOLD`;
+                log.style.color = "var(--dia)";
             } else {
-                showToast("합성 가능한 중복 영웅이 없습니다.");
+                log.innerText = `DEFEAT! TARGET IS TOO STRONG`;
+                log.style.color = "var(--mythic)";
             }
+            sync();
         },
 
-        sellHero: (uid) => {
-            const h = state.inv.find(x => x.uid === uid);
-            if(h) {
-                state.gold += h.grade === "MYTHIC" ? 5000 : 500;
-                state.inv = state.inv.filter(x => x.uid !== uid);
-                render.hero();
-                Game.updateUI();
-                save();
-            }
+        renderHero: () => {
+            const list = document.getElementById('hero-list');
+            list.innerHTML = '';
+            data.inv.sort((a,b) => (b.atk*b.star)-(a.atk*a.star)).forEach(h => {
+                list.innerHTML += `
+                <div class="card ${h.grade}">
+                    <div class="hero-img"><img src="${h.img}"></div>
+                    <div class="hero-detail">
+                        <b>${h.name} ★${h.star}</b>
+                        <small>POWER: ${Math.floor(h.atk * h.star).toLocaleString()}</small>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('h-count').innerText = data.inv.length;
         },
 
-        refine: () => {
-            if(state.gold < 2000) return showToast("골드 부족!");
-            state.gold -= 2000;
-            if(Math.random() < 0.35) {
-                state.wp++; showToast("제련 성공!");
-            } else {
-                if(state.prot > 0) { state.prot--; showToast("보호석이 파괴를 막았습니다!"); }
-                else { state.wp = Math.max(0, state.wp-1); showToast("제련 실패로 등급 하락.."); }
-            }
-            render.hero();
-            Game.updateUI();
-            save();
+        renderRank: () => {
+            const totalDB = JSON.parse(localStorage.getItem('mo_full_db') || "{}");
+            const sorted = Object.keys(totalDB).map(k => ({id: k, stage: totalDB[k].stage})).sort((a,b) => b.stage - a.stage);
+            const list = document.getElementById('rank-list');
+            list.innerHTML = sorted.slice(0, 10).map((u, i) => `
+                <div class="rank-item" style="${u.id===user?'border:1px solid var(--dia)':''}">
+                    <span>${i+1}. <b>${u.id}</b></span>
+                    <span style="color:var(--gold)">STAGE ${u.stage}</span>
+                </div>`).join('');
         },
 
-        buyShop: (type) => {
-            if(type === 'dia' && state.gold >= 8000) { state.gold -= 8000; state.dia += 100; }
-            else if(type === 'prot' && state.gold >= 15000) { state.gold -= 15000; state.prot++; }
-            else return showToast("골드가 부족합니다.");
-            Game.updateUI();
-            save();
+        buy: (type) => {
+            if(type === 'auto' && data.gold >= 3000) { data.gold -= 3000; buff.auto += 30; toast("AUTO STRIKE READY"); }
+            else if(type === 'dia' && data.gold >= 8000) { data.gold -= 8000; data.dia += 100; toast("EXCHANGED"); }
+            else toast("NOT ENOUGH GOLD");
+            sync();
         },
 
-        changeTab: (tab, el) => {
+        changeTab: (name, el) => {
             document.querySelectorAll('.main-content > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${name}`).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
-            if(render[tab]) render[tab]();
-        },
-
-        updateUI: () => {
-            document.getElementById('txt-gold').innerText = Math.floor(state.gold).toLocaleString();
-            document.getElementById('txt-dia').innerText = Math.floor(state.dia).toLocaleString();
-            document.getElementById('txt-atk').innerText = Math.floor(getAtk()).toLocaleString();
-            document.getElementById('txt-stage').innerText = state.stage;
-            const hpPer = Math.max(0, (state.mHp / state.maxHp) * 100);
-            document.getElementById('hp-bar').style.width = hpPer + "%";
-            document.getElementById('hp-text').innerText = `${Math.floor(Math.max(0, state.mHp)).toLocaleString()} / ${state.maxHp.toLocaleString()}`;
+            if(name === 'hero') Game.renderHero();
+            if(name === 'social') Game.renderRank();
         }
     };
 })();
 </script>
 </body>
-</html>
+    </html>
