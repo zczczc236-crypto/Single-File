@@ -3,266 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythic Gacha Master: Masterpiece</title>
+    <title>Mythic Warlord: Genesis</title>
     <style>
         :root {
-            --ssr: #ffcc00; --sr: #c154ff; --r: #00d2ff;
+            --ssr: #ffcc00; --sr: #c154ff; --r: #00d2ff; --uc: #1eff00; --fail: #555;
             --gold: #ffd700; --dia: #00f2ff; --bg: #05050a;
         }
 
         body {
             margin: 0; background: var(--bg); color: white;
-            font-family: 'Pretendard', sans-serif; overflow: hidden;
-            display: flex; justify-content: center; height: 100vh;
+            font-family: 'Pretendard', sans-serif;
+            display: flex; justify-content: center; height: 100vh; overflow: hidden;
         }
 
         #app {
-            width: 100%; max-width: 450px; display: flex; flex-direction: column;
-            background: linear-gradient(180deg, #111 0%, #000 100%);
-            position: relative; box-shadow: 0 0 100px rgba(0,242,255,0.1);
+            width: 100%; max-width: 480px; display: flex; flex-direction: column;
+            background: radial-gradient(circle at top, #1a1a2e 0%, #05050a 100%);
+            position: relative; box-shadow: 0 0 100px #000; height: 100%;
         }
 
-        /* 상단 바: 자원 및 레벨 */
+        /* 상단 스테이터스 */
         .status-bar {
-            padding: 15px; background: rgba(255,255,255,0.05);
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            border-bottom: 1px solid #333; backdrop-filter: blur(10px);
+            padding: 15px; background: rgba(0, 0, 0, 0.9);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            border-bottom: 2px solid #333; z-index: 100;
         }
-        .stat-item { background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; }
-        .lv-bar { grid-column: 1 / -1; height: 4px; background: #333; border-radius: 2px; margin-top: 5px; overflow: hidden; }
-        .lv-progress { height: 100%; background: var(--dia); width: 0%; transition: 0.3s; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; text-align: center; border: 1px solid #444; }
 
-        /* 메인 컨텐츠 구역 */
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scrollbar-width: none; }
+        /* 컨텐츠 영역 */
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; scrollbar-width: none; }
         .content::-webkit-scrollbar { display: none; }
 
-        /* 카드 애니메이션 */
-        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
-        .card {
-            background: #1a1a1a; border-radius: 15px; border: 2px solid #333;
-            overflow: hidden; position: relative; animation: cardIn 0.5s ease-out forwards;
+        /* 전투 시스템 UI */
+        .battle-view {
+            background: rgba(0,0,0,0.6); border: 2px solid #444; border-radius: 24px;
+            padding: 20px; text-align: center; position: relative; overflow: hidden;
+            margin-bottom: 20px;
         }
-        @keyframes cardIn { from { transform: scale(0.5) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-        .card img { width: 100%; height: 140px; object-fit: cover; }
-        .card-grade { position: absolute; top: 5px; left: 5px; font-size: 10px; padding: 2px 6px; border-radius: 5px; font-weight: 900; }
-
-        /* 도감 스타일 */
-        .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .col-item { aspect-ratio: 1/1; border-radius: 8px; border: 1px solid #333; position: relative; overflow: hidden; }
-        .col-item.locked { filter: grayscale(1) brightness(0.3); }
-        .col-item img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* 하단 네비게이션 */
-        .nav {
-            position: absolute; bottom: 0; width: 100%; height: 70px;
-            display: flex; background: rgba(10, 10, 15, 0.95); border-top: 1px solid #333;
+        .monster-box { height: 180px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .monster-img { font-size: 6rem; transition: 0.1s; z-index: 5; }
+        .hp-container { margin: 15px 0; }
+        .hp-bar { height: 14px; background: #222; border-radius: 7px; overflow: hidden; border: 1px solid #555; }
+        .hp-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: 0.1s; }
+        
+        /* 스킬/데미지 이펙트 */
+        .dmg-text {
+            position: absolute; color: #fff; font-weight: 900; font-size: 1.5rem;
+            pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20;
+            text-shadow: 2px 2px 0 #000;
         }
-        .nav-btn { flex: 1; border: none; background: none; color: #666; cursor: pointer; font-size: 0.75rem; transition: 0.3s; }
-        .nav-btn.active { color: var(--dia); font-weight: bold; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
 
-        /* 공통 버튼 */
-        .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-draw { width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
-        .btn-1 { background: #333; color: white; }
-        .btn-10 { background: linear-gradient(90deg, #ff4b2b, #ff416c); color: white; box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3); }
+        /* 카드 및 가차 */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .card { 
+            background: #111; border-radius: 15px; border: 2px solid #333; overflow: hidden; 
+            position: relative; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .card img { width: 100%; height: 120px; object-fit: cover; }
+        .card-info { padding: 8px; text-align: center; font-size: 0.75rem; }
+        .rank-badge { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; color: var(--dia); }
 
-        .title-display { text-align: center; margin-bottom: 20px; }
-        .title-badge { color: var(--ssr); font-size: 0.9rem; border: 1px solid var(--ssr); padding: 2px 10px; border-radius: 20px; }
+        /* 대장간 & 진화 */
+        .menu-box { background: rgba(255,255,255,0.03); border: 1px solid #444; border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 20px; }
+        
+        /* 도감 그리드 */
+        .col-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .col-slot { aspect-ratio: 1/1; background: #111; border-radius: 5px; border: 1px solid #333; overflow: hidden; }
+        .col-slot img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) brightness(0.3); }
+        .col-slot.owned img { filter: grayscale(0) brightness(1); }
+
+        /* 하단 네비 */
+        .nav { position: absolute; bottom: 0; width: 100%; height: 80px; display: flex; background: #0a0a0f; border-top: 2px solid #333; z-index: 200; }
+        .nav-btn { flex: 1; border: none; background: none; color: #555; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; }
+        .nav-btn.active { color: var(--dia); }
+        .nav-btn i { font-size: 1.5rem; margin-bottom: 4px; }
+
+        /* 버튼 공통 */
+        .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; }
+        .btn-p { background: linear-gradient(135deg, #ff416c, #ff4b2b); width: 100%; padding: 15px; font-size: 1rem; }
+        .btn-g { background: #333; width: 100%; padding: 15px; margin-bottom: 8px; }
+        .btn-s { background: var(--gold); color: black; padding: 5px 10px; font-size: 0.7rem; border-radius: 5px; }
 
         .hidden { display: none; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        #toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); padding: 12px 25px; border-radius: 30px; border: 1px solid var(--ssr); z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; text-align: center; }
     </style>
 </head>
 <body>
 
+<div id="toast">알림</div>
+
 <div id="app">
     <div class="status-bar">
-        <div class="stat-item" style="color:var(--dia)">💎 <span id="dia">2,000</span></div>
-        <div class="stat-item" style="color:var(--gold)">💰 <span id="gold">0</span></div>
-        <div class="stat-item" style="grid-column: span 2;">Lv.<span id="lv">1</span> <small>(EXP: <span id="exp">0</span>%)</small>
-            <div class="lv-bar"><div id="lv-prog" class="lv-progress"></div></div>
-        </div>
+        <div class="stat-card" style="color:var(--dia)">💎 <span id="val-dia">0</span></div>
+        <div class="stat-card" style="color:var(--gold)">💰 <span id="val-gold">0</span></div>
     </div>
 
-    <div class="content" id="main-content">
-        <div id="tab-draw">
-            <div class="title-display"><span id="user-title" class="title-badge">초보 소환사</span></div>
-            <div id="draw-result" class="card-grid">
-                <p style="grid-column: span 2; text-align: center; opacity: 0.5; margin-top: 50px;">신화 속 영웅을 불러내세요.</p>
-            </div>
-            <div style="margin-top: 20px;">
-                <button class="btn btn-draw btn-1" onclick="gacha(1)">1회 소환 (100💎)</button>
-                <button class="btn btn-draw btn-10" onclick="gacha(10)">10회 연속 소환 (1,000💎)</button>
+    <div class="content">
+        <div id="tab-battle">
+            <h3 style="text-align:center;">⚔️ 월드 보스 레이드</h3>
+            <div class="battle-view" id="battle-area">
+                <div style="font-size: 0.8rem; color: var(--ssr); font-weight: bold;">STAGE <span id="cur-stage">1</span></div>
+                <div class="monster-box">
+                    <div class="monster-img" id="monster-icon">🐉</div>
+                </div>
+                <div class="hp-container">
+                    <div class="hp-bar"><div id="hp-fill" class="hp-fill"></div></div>
+                </div>
+                <div style="font-size: 0.7rem; color: #888;">초당 자동 데미지: <span id="val-dps">0</span></div>
+                <button class="btn btn-p" style="margin-top:15px;" onclick="clickAttack()">화력 집중 (CLICK)</button>
             </div>
         </div>
 
-        <div id="tab-inv" class="hidden">
-            <h3>내 군단 (<span id="inv-count">0</span>)</h3>
+        <div id="tab-draw" class="hidden">
+            <h3 style="text-align:center;">🔮 차원의 제단</h3>
+            <div id="draw-area" class="grid" style="margin-bottom:15px;"></div>
+            <button class="btn btn-g" onclick="summon(1)">1회 소환 (100💎)</button>
+            <button class="btn btn-p" onclick="summon(10)">10회 연속 소환 (1,000💎)</button>
+        </div>
+
+        <div id="tab-manage">
+            <div class="menu-box">
+                <h4 style="margin:0 0 10px 0; color:var(--gold);">🔨 전설의 대장간</h4>
+                <div style="font-size: 0.9rem; margin-bottom:10px;">무기 레벨: <span id="val-wp" style="color:var(--ssr)">+0</span></div>
+                <button class="btn btn-s" onclick="upgradeWeapon()">강화하기 (<span id="wp-cost">500</span>💰)</button>
+            </div>
+
+            <h4 style="margin:10px 0;">📖 영웅 도감 (<span id="col-count">0</span>/50)</h4>
+            <div id="col-grid" class="col-grid" style="margin-bottom:20px;"></div>
+
+            <h4 style="margin:10px 0;">⚔️ 보유 군단</h4>
             <div id="inv-list"></div>
-        </div>
-
-        <div id="tab-col" class="hidden">
-            <h3>영웅 도감 (<span id="col-count">0</span>/12)</h3>
-            <div id="col-grid" class="collection-grid"></div>
-        </div>
-
-        <div id="tab-shop" class="hidden">
-            <h3>차원 상점</h3>
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
-                <p>💰 골드를 다이아로 연성합니다.</p>
-                <button class="btn btn-1" style="width:100%; margin-bottom:10px;" onclick="exchange(1000, 5000)">1,000💎 교환 (5,000💰)</button>
-                <button class="btn btn-10" style="width:100%;" onclick="exchange(5000, 20000)">5,500💎 교환 (20,000💰)</button>
-            </div>
         </div>
     </div>
 
     <nav class="nav">
-        <button class="nav-btn active" onclick="nav('draw')">🏠 소환</button>
-        <button class="nav-btn" onclick="nav('inv')">⚔️ 군단</button>
-        <button class="nav-btn" onclick="nav('col')">📖 도감</button>
-        <button class="nav-btn" onclick="nav('shop')">💎 상점</button>
+        <button class="nav-btn active" onclick="nav('battle')"><i>⚔️</i>전투</button>
+        <button class="nav-btn" onclick="nav('draw')"><i>🔮</i>소환</button>
+        <button class="nav-btn" onclick="nav('manage')"><i>👤</i>관리</button>
     </nav>
 </div>
 
 <script>
-    /* --- 아이템 및 시스템 데이터 --- */
-    const db = [
-        {id:0, name:"루시퍼", grade:"SSR", price:10000, img:"https://loremflickr.com/300/400/demon"},
-        {id:1, name:"가브리엘", grade:"SSR", price:10000, img:"https://loremflickr.com/300/400/angel"},
-        {id:2, name:"바하무트", grade:"SSR", price:9000, img:"https://loremflickr.com/300/400/dragon"},
-        {id:3, name:"아테나", grade:"SR", price:3000, img:"https://loremflickr.com/300/400/woman,warrior"},
-        {id:4, name:"오딘", grade:"SR", price:3000, img:"https://loremflickr.com/300/400/king"},
-        {id:5, name:"아서", grade:"SR", price:2500, img:"https://loremflickr.com/300/400/knight"},
-        {id:6, name:"멀린", grade:"SR", price:2500, img:"https://loremflickr.com/300/400/wizard"},
-        {id:7, name:"페가수스", grade:"R", price:1000, img:"https://loremflickr.com/300/400/horse"},
-        {id:8, name:"미노타우르스", grade:"R", price:900, img:"https://loremflickr.com/300/400/monster"},
-        {id:9, name:"켄타우로스", grade:"R", price:900, img:"https://loremflickr.com/300/400/archer"},
-        {id:10, name:"해골병사", grade:"R", price:800, img:"https://loremflickr.com/300/400/skeleton"},
-        {id:11, name:"슬라임", grade:"R", price:700, img:"https://loremflickr.com/300/400/slime"}
-    ];
+    /* --- 영웅 데이터베이스 (50종 확장) --- */
+    const NAMES = ["가디언", "슬레이어", "위저드", "로그", "하이엘프", "드래곤나이트", "발키리", "리치", "타이탄", "엔젤"];
+    const GRADES = ["R", "SR", "SSR", "MYTHIC"];
+    const HERO_DB = [];
 
-    let user = JSON.parse(localStorage.getItem('mythic_vfinal')) || {
-        dia: 2000, gold: 0, exp: 0, lv: 1,
-        inv: [], col: []
+    for(let i=1; i<=50; i++) {
+        let g = i > 45 ? "MYTHIC" : (i > 35 ? "SSR" : (i > 15 ? "SR" : "R"));
+        HERO_DB.push({
+            id: i,
+            name: `${NAMES[i%10]} #0${i}`,
+            grade: g,
+            atk: (i * 20) + (g === "MYTHIC" ? 5000 : (g === "SSR" ? 1000 : 100)),
+            price: i * 50 + (g === "SSR" ? 5000 : 500),
+            img: `https://loremflickr.com/200/200/hero,fantasy?sig=${i}`
+        });
+    }
+
+    /* --- 게임 상태 --- */
+    let game = JSON.parse(localStorage.getItem('mythic_warlord_final')) || {
+        dia: 2000, gold: 0, wp: 0, stage: 1, inv: [], col: [], mHp: 1000, maxHp: 1000
     };
 
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    function sfx(f, d, t='sine') {
-        const o = ctx.createOscillator(); const g = ctx.createGain();
-        o.type = t; o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime+d);
-        o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
+    function msg(m) {
+        const t = document.getElementById('toast');
+        t.innerText = m; t.style.opacity = 1;
+        setTimeout(() => t.style.opacity = 0, 1500);
     }
 
-    /* --- 내비게이션 --- */
-    function nav(t) {
-        document.querySelectorAll('.content > div').forEach(d => d.classList.add('hidden'));
-        document.getElementById('tab-'+t).classList.remove('hidden');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        if(t === 'inv') renderInv();
-        if(t === 'col') renderCol();
+    /* --- 전투 시스템 --- */
+    function calcDmg() {
+        let heroAtk = game.inv.reduce((s, h) => s + (h.atk * (h.star || 1)), 0);
+        let wpAtk = game.wp * 300;
+        return Math.max(10, heroAtk + wpAtk);
     }
 
-    /* --- 핵심 로직 --- */
-    function gacha(n) {
-        if(user.dia < n*100) return alert("다이아가 부족합니다!");
-        user.dia -= n*100;
-        const resDiv = document.getElementById('draw-result');
-        resDiv.innerHTML = '';
+    function clickAttack() {
+        spawnDmg(calcDmg() * 2);
+        hit(calcDmg() * 2);
+    }
+
+    function spawnDmg(d) {
+        const area = document.getElementById('battle-area');
+        const text = document.createElement('div');
+        text.className = 'dmg-text';
+        text.innerText = `-${Math.floor(d)}`;
+        text.style.left = (40 + Math.random() * 20) + '%';
+        area.appendChild(text);
+        setTimeout(() => text.remove(), 800);
         
+        const img = document.getElementById('monster-icon');
+        img.style.transform = 'scale(0.9) rotate(5deg)';
+        setTimeout(() => img.style.transform = 'scale(1) rotate(0)', 100);
+    }
+
+    function hit(d) {
+        game.mHp -= d;
+        if(game.mHp <= 0) {
+            let reward = game.stage * 1500;
+            game.gold += reward;
+            game.stage++;
+            game.maxHp = game.stage * 3000;
+            game.mHp = game.maxHp;
+            msg(`보스 처치! +${reward}💰 획득`);
+            updateMonster();
+        }
+        updateUI();
+    }
+
+    setInterval(() => hit(calcDmg() / 10), 100); // 0.1초마다 자동 공격
+
+    /* --- 가차 시스템 (꽝 추가) --- */
+    function summon(n) {
+        if(game.dia < n*100) return msg("다이아가 부족합니다!");
+        game.dia -= n*100;
+        const area = document.getElementById('draw-area');
+        area.innerHTML = '';
+
         for(let i=0; i<n; i++) {
             setTimeout(() => {
-                const item = pull();
-                user.inv.push({...item, uid: Math.random()});
-                if(!user.col.includes(item.id)) user.col.push(item.id);
-                
-                // 경험치 및 칭호 체크
-                user.exp += (item.grade === 'SSR' ? 20 : (item.grade === 'SR' ? 10 : 5));
-                if(user.exp >= 100) { user.lv++; user.exp = 0; sfx(880, 0.5, 'square'); }
-                
-                renderCard(item, resDiv);
-                if(item.grade === 'SSR') { sfx(1200, 0.6, 'square'); document.getElementById('app').classList.add('shake'); setTimeout(()=>document.getElementById('app').classList.remove('shake'), 400); }
-                else sfx(440, 0.1);
-                
-                save(); updateUI();
-            }, i * 150);
+                const r = Math.random() * 100;
+                let pick = null;
+                if(r < 15) { // 15% 꽝
+                    pick = { id: -1, name: "부서진 돌맹이", grade: "FAIL", img: "https://loremflickr.com/200/200/stone" };
+                } else {
+                    const gr = Math.random() * 100;
+                    const pool = gr < 2 ? HERO_DB.filter(h=>h.grade==='MYTHIC') : (gr < 8 ? HERO_DB.filter(h=>h.grade==='SSR') : (gr < 30 ? HERO_DB.filter(h=>h.grade==='SR') : HERO_DB.filter(h=>h.grade==='R')));
+                    pick = pool[Math.floor(Math.random() * pool.length)];
+                    addHero(pick);
+                }
+                const card = document.createElement('div');
+                card.className = `card ${pick.grade === 'FAIL' ? 'fail' : ''}`;
+                card.innerHTML = `<img src="${pick.img}"><div class="card-info"><b style="color:var(--${pick.grade.toLowerCase()})">${pick.name}</b></div>`;
+                area.appendChild(card);
+                updateUI(); save();
+            }, i * 100);
         }
     }
 
-    function pull() {
-        const r = Math.random() * 100;
-        const gradePool = r < 5 ? 'SSR' : (r < 25 ? 'SR' : 'R');
-        const items = db.filter(i => i.grade === gradePool);
-        return items[Math.floor(Math.random()*items.length)];
+    function addHero(h) {
+        game.inv.push({...h, uid: Date.now() + Math.random(), star: 1});
+        if(!game.col.includes(h.id)) game.col.push(h.id);
     }
 
-    function renderCard(item, target) {
-        const d = document.createElement('div');
-        d.className = 'card'; d.style.borderColor = `var(--${item.grade.toLowerCase()})`;
-        d.innerHTML = `<span class="card-grade" style="background:var(--${item.grade.toLowerCase()})">${item.grade}</span><img src="${item.img}?sig=${Math.random()}"><div style="padding:8px; font-size:12px; text-align:center;">${item.name}</div>`;
-        target.appendChild(d);
+    /* --- 강화 및 진화(합성) --- */
+    function upgradeWeapon() {
+        const cost = 500 + (game.wp * 600);
+        if(game.gold < cost) return msg("골드가 부족합니다!");
+        game.gold -= cost;
+        
+        const chance = Math.max(100 - (game.wp * 8), 5);
+        if(Math.random() * 100 <= chance) {
+            game.wp++;
+            msg(`✨ 강화 성공! (+${game.wp})`);
+        } else {
+            game.wp = Math.max(0, game.wp - 1);
+            msg("💥 강화 실패! 단계가 하락했습니다.");
+        }
+        updateUI(); save();
     }
 
-    /* --- 인벤토리 및 도감 --- */
-    function renderInv() {
-        const list = document.getElementById('inv-list');
-        list.innerHTML = '';
-        document.getElementById('inv-count').innerText = user.inv.length;
-        user.inv.forEach((item, idx) => {
-            const row = document.createElement('div');
-            row.style = "display:flex; align-items:center; background:#222; margin-bottom:10px; padding:10px; border-radius:10px;";
-            row.innerHTML = `<img src="${item.img}" style="width:40px; height:40px; border-radius:5px; margin-right:10px;">
-                <div style="flex:1; font-size:13px;"><b style="color:var(--${item.grade.toLowerCase()})">${item.name}</b><br><small>${item.price}💰</small></div>
-                <button class="btn btn-1" style="padding:5px 10px;" onclick="sell(${idx})">판매</button>`;
-            list.appendChild(row);
-        });
+    // 동일 영웅 합성 (진화)
+    function evolve(id) {
+        const targets = game.inv.filter(h => h.id === id);
+        if(targets.length < 2) return msg("진화하려면 동일한 영웅이 2명 필요합니다.");
+        
+        // 두 명 제거하고 하나를 진화된 상태로 추가
+        let idx1 = game.inv.findIndex(h => h.id === id);
+        game.inv.splice(idx1, 1);
+        let idx2 = game.inv.findIndex(h => h.id === id);
+        let base = game.inv[idx2];
+        base.star = (base.star || 1) + 1;
+        base.atk *= 1.5;
+        base.price *= 2;
+        
+        msg(`⭐ 진화 성공! [${base.name}] ${base.star}성 달성!`);
+        nav('manage'); updateUI(); save();
+    }
+
+    /* --- 시스템 UI --- */
+    function nav(t) {
+        document.querySelectorAll('.content > div').forEach(d => d.classList.add('hidden'));
+        document.getElementById('tab-' + t).classList.remove('hidden');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        if(t === 'manage') { renderCol(); renderInv(); }
     }
 
     function renderCol() {
-        const grid = document.getElementById('col-grid');
-        grid.innerHTML = '';
-        document.getElementById('col-count').innerText = user.col.length;
-        db.forEach(item => {
-            const locked = !user.col.includes(item.id);
+        const grid = document.getElementById('col-grid'); grid.innerHTML = '';
+        HERO_DB.forEach(h => {
+            const owned = game.col.includes(h.id);
+            grid.innerHTML += `<div class="col-slot ${owned?'owned':''}"><img src="${h.img}"></div>`;
+        });
+        document.getElementById('col-count').innerText = game.col.length;
+    }
+
+    function renderInv() {
+        const list = document.getElementById('inv-list'); list.innerHTML = '';
+        // 판매가는 강화레벨에 비례해 상승
+        game.inv.forEach((h, idx) => {
+            const sellPrice = Math.floor(h.price * (1 + game.wp * 0.25));
             const div = document.createElement('div');
-            div.className = `col-item ${locked ? 'locked' : ''}`;
-            div.innerHTML = `<img src="${item.img}">`;
-            grid.appendChild(div);
+            div.style = "display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:8px; padding:12px; border-radius:12px; border:1px solid #333;";
+            div.innerHTML = `
+                <img src="${h.img}" style="width:45px; height:45px; border-radius:8px; margin-right:12px;">
+                <div style="flex:1; font-size:0.8rem;">
+                    <b style="color:var(--${h.grade.toLowerCase()})">${h.name}</b> <span style="color:var(--gold)">★${h.star}</span><br>
+                    공격력: ${Math.floor(h.atk * h.star)} | 가치: ${sellPrice.toLocaleString()}💰
+                </div>
+                <button class="btn btn-s" onclick="evolve(${h.id})" style="background:#555; margin-right:5px;">합성</button>
+                <button class="btn btn-s" onclick="sellHero(${idx})" style="background:#f44; color:white;">판매</button>
+            `;
+            list.appendChild(div);
         });
     }
 
-    function sell(idx) {
-        user.gold += user.inv[idx].price;
-        user.inv.splice(idx, 1);
-        save(); updateUI(); renderInv();
-        sfx(600, 0.1);
+    function sellHero(idx) {
+        const sellPrice = Math.floor(game.inv[idx].price * (1 + game.wp * 0.25));
+        game.gold += sellPrice;
+        game.inv.splice(idx, 1);
+        renderInv(); updateUI(); save();
     }
 
-    function exchange(d, g) {
-        if(user.gold < g) return alert("골드가 부족합니다!");
-        user.gold -= g; user.dia += d;
-        save(); updateUI();
-        sfx(1000, 0.3);
+    function updateMonster() {
+        const icons = ["🐉", "🐙", "🧙", "🧛", "🧟", "🤖"];
+        document.getElementById('monster-icon').innerText = icons[game.stage % icons.length];
     }
 
     function updateUI() {
-        document.getElementById('dia').innerText = user.dia.toLocaleString();
-        document.getElementById('gold').innerText = user.gold.toLocaleString();
-        document.getElementById('lv').innerText = user.lv;
-        document.getElementById('exp').innerText = user.exp;
-        document.getElementById('lv-prog').style.width = user.exp + '%';
-        
-        // 칭호 로직
-        let title = "초보 소환사";
-        if(user.col.length >= 12) title = "🔱 신화의 정복자";
-        else if(user.lv >= 10) title = "고급 마법사";
-        else if(user.lv >= 5) title = "숙련된 모험가";
-        document.getElementById('user-title').innerText = title;
+        document.getElementById('val-dia').innerText = game.dia.toLocaleString();
+        document.getElementById('val-gold').innerText = game.gold.toLocaleString();
+        document.getElementById('hp-fill').style.width = (game.mHp / game.maxHp * 100) + '%';
+        document.getElementById('cur-stage').innerText = game.stage;
+        document.getElementById('val-dps').innerText = Math.floor(calcDmg()).toLocaleString();
+        document.getElementById('val-wp').innerText = `+${game.wp}`;
+        document.getElementById('wp-cost').innerText = (500 + (game.wp * 600)).toLocaleString();
     }
 
-    function save() { localStorage.setItem('mythic_vfinal', JSON.stringify(user)); }
+    function save() { localStorage.setItem('mythic_warlord_final', JSON.stringify(game)); }
+
+    // 초기 실행
     updateUI();
+    updateMonster();
 </script>
 </body>
 </html>
