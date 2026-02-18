@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>Mythic Overlord: Final Visual</title>
+    <title>Mythic Overlord: Visual Saga</title>
     <style>
         :root {
             --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #0a0a12;
@@ -20,7 +20,7 @@
         .stat-box div { font-size: 0.7rem; color: #888; margin-bottom: 2px; }
         .stat-box span { font-size: 0.85rem; font-weight: bold; }
 
-        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
 
         .battle-stage { background: var(--panel); border-radius: 25px; border: 2px solid #444; padding: 25px 15px; text-align: center; margin-bottom: 20px; }
@@ -59,6 +59,10 @@
         .hidden { display: none !important; }
         .shake { animation: shake 0.1s infinite; }
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(0,0); } }
+        
+        .color-sr { color: var(--sr); }
+        .color-ssr { color: var(--ssr); }
+        .color-mythic { color: var(--mythic); text-shadow: 0 0 5px var(--mythic); }
     </style>
 </head>
 <body>
@@ -66,7 +70,7 @@
 <div id="toast">메시지</div>
 
 <div id="auth-screen" class="overlay">
-    <h1 style="color:var(--dia); margin:0;">MYTHIC OVERLORD</h1>
+    <h1 style="color:var(--dia); margin:0; letter-spacing: 2px;">MYTHIC OVERLORD</h1>
     <p style="color:#666; font-size: 0.8rem; margin-bottom: 30px;">VISUAL SAGA EDITION</p>
     <input type="text" id="join-id" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:10px;" placeholder="영주 아이디">
     <input type="password" id="join-pw" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:20px;" placeholder="비밀번호">
@@ -144,7 +148,7 @@
 
 <script>
 /**
- * MYTHIC OVERLORD - FINAL ENGINE
+ * MYTHIC OVERLORD - FINAL STABLE ENGINE
  */
 const Game = (() => {
     let user = "";
@@ -155,32 +159,29 @@ const Game = (() => {
     };
 
     const HERO_DB = [];
-    const GRADES = ["SR", "SSR", "MYTHIC"];
     const AI_PROMPTS = {
         SR: "fantasy+knight+warrior+portrait",
         SSR: "magical+wizard+elf+glowing+portrait",
         MYTHIC: "godlike+armored+king+celestial+portrait"
     };
 
-    // 초기 DB 생성
+    // Initialize Hero Database with AI Image Mappings
     for(let i=1; i<=30; i++) {
         let g = i > 25 ? "MYTHIC" : (i > 15 ? "SSR" : "SR");
         HERO_DB.push({
             id: i,
             name: `${g} Hero #${i}`,
             grade: g,
-            img: `https://image.pollinations.ai/prompt/${AI_PROMPTS[g]}+${i}?width=100&height=100&nologo=true`,
-            atk: i * 100 + (i > 15 ? 2000 : 200)
+            img: `https://image.pollinations.ai/prompt/${AI_PROMPTS[g]}+v${i}?width=150&height=150&nologo=true`,
+            atk: i * 150 + (i > 15 ? 3000 : 300)
         });
     }
 
-    const MONSTERS = [
-        "slime+monster", "skeleton+warrior", "dark+orc", "giant+spider", "fire+demon", "ancient+dragon"
-    ];
+    const MONSTERS = ["slime", "skeleton", "orc", "spider", "demon", "dragon", "beholder", "golem"];
 
     const save = () => {
         if(!user) return;
-        localStorage.setItem(`mo_v2_${user}`, JSON.stringify(state));
+        localStorage.setItem(`mo_saga_v3_${user}`, JSON.stringify(state));
     };
 
     const showToast = (m) => {
@@ -193,12 +194,12 @@ const Game = (() => {
         let base = state.inv.reduce((s, h) => s + (h.atk * h.star), 0);
         let bookBonus = 1 + (state.book.length * 0.05);
         let artiBonus = 1 + (state.artis[1] * 0.5);
-        return (base + (state.wp * 1000) + 100) * bookBonus * artiBonus;
+        return (base + (state.wp * 1200) + 100) * bookBonus * artiBonus;
     };
 
     const updateMonster = () => {
         const mIdx = (state.stage - 1) % MONSTERS.length;
-        const url = `https://image.pollinations.ai/prompt/fantasy+${MONSTERS[mIdx]}?width=200&height=200&nologo=true`;
+        const url = `https://image.pollinations.ai/prompt/fantasy+${MONSTERS[mIdx]}+monster+dark+background?width=250&height=250&nologo=true`;
         document.getElementById('monster-icon').innerHTML = `<img src="${url}" class="monster-img">`;
     };
 
@@ -213,12 +214,12 @@ const Game = (() => {
         hero: () => {
             const list = document.getElementById('list-heroes');
             list.innerHTML = '';
-            state.inv.forEach(h => {
+            state.inv.sort((a,b) => (b.atk*b.star) - (a.atk*a.star)).forEach(h => {
                 list.innerHTML += `
                     <div class="card" style="border-color:${h.grade==='MYTHIC'?'#ff4757':'#444'}">
-                        <div class="hero-icon"><img src="${h.img}"></div>
+                        <div class="hero-icon"><img src="${h.img}" loading="lazy"></div>
                         <div class="hero-info">
-                            <b style="color:var(--${h.grade.toLowerCase()})">${h.name} [★${h.star}]</b>
+                            <b class="color-${h.grade.toLowerCase()}">${h.name} [★${h.star}]</b>
                             <small>ATK: ${Math.floor(h.atk * h.star).toLocaleString()}</small>
                         </div>
                         <button class="btn btn-sm" onclick="Game.sellHero(${h.uid})">판매</button>
@@ -233,7 +234,7 @@ const Game = (() => {
             grid.innerHTML = '';
             HERO_DB.forEach(h => {
                 const active = state.book.includes(h.id);
-                grid.innerHTML += `<div class="book-item ${active?'active':''}"><img src="${h.img}"></div>`;
+                grid.innerHTML += `<div class="book-item ${active?'active':''}"><img src="${h.img}" loading="lazy"></div>`;
             });
         }
     };
@@ -241,9 +242,11 @@ const Game = (() => {
     return {
         auth: () => {
             const id = document.getElementById('join-id').value.trim();
-            if(!id) return alert("아이디 입력!");
+            const pw = document.getElementById('join-pw').value.trim();
+            if(!id || !pw) return alert("계정 정보를 입력하세요.");
+            
             user = id;
-            const saved = localStorage.getItem(`mo_v2_${id}`);
+            const saved = localStorage.getItem(`mo_saga_v3_${id}`);
             if(saved) state = JSON.parse(saved);
             
             document.getElementById('auth-screen').classList.add('hidden');
@@ -251,25 +254,28 @@ const Game = (() => {
             Game.updateUI();
             updateMonster();
             
-            // 자동 공격 루프
             setInterval(() => {
-                Game.doDamage(getAtk() * 0.1);
+                Game.doDamage(getAtk() * 0.1, false);
             }, 1000);
         },
 
         attack: () => {
-            Game.doDamage(getAtk());
-            document.getElementById('stage-box').classList.add('shake');
-            setTimeout(() => document.getElementById('stage-box').classList.remove('shake'), 50);
+            Game.doDamage(getAtk(), true);
+            const box = document.getElementById('stage-box');
+            box.style.transform = "scale(0.98)";
+            setTimeout(() => box.style.transform = "scale(1)", 50);
         },
 
-        doDamage: (dmg) => {
+        doDamage: (dmg, isManual) => {
             state.mHp -= dmg;
             if(state.mHp <= 0) {
-                state.gold += (1000 + (state.stage * 200)) * (1 + state.artis[2]);
-                if(Math.random() < 0.1) state.artis[Math.floor(Math.random()*3)+1]++;
+                state.gold += (1000 + (state.stage * 250)) * (1 + (state.artis[2]*0.7));
+                if(Math.random() < 0.15) {
+                    state.artis[Math.floor(Math.random()*3)+1]++;
+                    showToast("🏺 유물의 공명을 느낍니다!");
+                }
                 state.stage++;
-                state.maxHp = Math.floor(2000 * Math.pow(1.2, state.stage-1));
+                state.maxHp = Math.floor(2000 * Math.pow(1.25, state.stage-1));
                 state.mHp = state.maxHp;
                 updateMonster();
                 save();
@@ -284,7 +290,8 @@ const Game = (() => {
             resArea.innerHTML = '';
             for(let i=0; i<n; i++) {
                 const pick = HERO_DB[Math.floor(Math.random() * HERO_DB.length)];
-                state.inv.push({...pick, uid: Date.now() + Math.random(), star: 1});
+                const newHero = {...pick, uid: Date.now() + Math.random(), star: 1};
+                state.inv.push(newHero);
                 if(!state.book.includes(pick.id)) state.book.push(pick.id);
                 resArea.innerHTML += `<div class="book-item active"><img src="${pick.img}"></div>`;
             }
@@ -294,52 +301,61 @@ const Game = (() => {
 
         autoEvolve: () => {
             let evolved = false;
-            let groups = {};
+            let map = {};
             state.inv.forEach(h => {
-                if(!groups[h.id]) groups[h.id] = [];
-                groups[h.id].push(h);
+                if(!map[h.id]) map[h.id] = [];
+                map[h.id].push(h);
             });
 
-            for(let id in groups) {
-                while(groups[id].length >= 2) {
-                    let h1 = groups[id].pop();
-                    let h2 = groups[id].pop();
+            for(let id in map) {
+                while(map[id].length >= 2) {
+                    let h1 = map[id].pop();
+                    let h2 = map[id].pop();
                     h1.star += 1;
+                    h1.atk *= 1.5;
                     state.inv = state.inv.filter(x => x.uid !== h2.uid);
                     evolved = true;
                 }
             }
             if(evolved) {
-                showToast("합성 성공!");
+                showToast("군단 합성 완료!");
                 render.hero();
                 save();
+                Game.updateUI();
+            } else {
+                showToast("합성 가능한 중복 영웅이 없습니다.");
             }
         },
 
         sellHero: (uid) => {
-            state.inv = state.inv.filter(h => h.uid !== uid);
-            state.gold += 500;
-            render.hero();
-            save();
+            const h = state.inv.find(x => x.uid === uid);
+            if(h) {
+                state.gold += h.grade === "MYTHIC" ? 5000 : 500;
+                state.inv = state.inv.filter(x => x.uid !== uid);
+                render.hero();
+                Game.updateUI();
+                save();
+            }
         },
 
         refine: () => {
             if(state.gold < 2000) return showToast("골드 부족!");
             state.gold -= 2000;
             if(Math.random() < 0.35) {
-                state.wp++; showToast("성공!");
+                state.wp++; showToast("제련 성공!");
             } else {
-                if(state.prot > 0) { state.prot--; showToast("방어!"); }
-                else { state.wp = Math.max(0, state.wp-1); showToast("실패.."); }
+                if(state.prot > 0) { state.prot--; showToast("보호석이 파괴를 막았습니다!"); }
+                else { state.wp = Math.max(0, state.wp-1); showToast("제련 실패로 등급 하락.."); }
             }
             render.hero();
+            Game.updateUI();
             save();
         },
 
         buyShop: (type) => {
             if(type === 'dia' && state.gold >= 8000) { state.gold -= 8000; state.dia += 100; }
             else if(type === 'prot' && state.gold >= 15000) { state.gold -= 15000; state.prot++; }
-            else return showToast("골드 부족!");
+            else return showToast("골드가 부족합니다.");
             Game.updateUI();
             save();
         },
@@ -357,12 +373,12 @@ const Game = (() => {
             document.getElementById('txt-dia').innerText = Math.floor(state.dia).toLocaleString();
             document.getElementById('txt-atk').innerText = Math.floor(getAtk()).toLocaleString();
             document.getElementById('txt-stage').innerText = state.stage;
-            const hpPer = (state.mHp / state.maxHp) * 100;
+            const hpPer = Math.max(0, (state.mHp / state.maxHp) * 100);
             document.getElementById('hp-bar').style.width = hpPer + "%";
-            document.getElementById('hp-text').innerText = `${Math.floor(state.mHp).toLocaleString()} / ${state.maxHp.toLocaleString()}`;
+            document.getElementById('hp-text').innerText = `${Math.floor(Math.max(0, state.mHp)).toLocaleString()} / ${state.maxHp.toLocaleString()}`;
         }
     };
 })();
 </script>
 </body>
-    </html>
+</html>
