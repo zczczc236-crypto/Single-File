@@ -9,324 +9,477 @@
             --mythic: #ff4757; --ssr: #ffa502; --sr: #7ed6df; --bg: #0a0a12;
             --gold: #ffd700; --dia: #00d2ff; --panel: rgba(255, 255, 255, 0.05);
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: #eee; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
-        #app { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; position: relative; border-left: 1px solid #333; border-right: 1px solid #333; background: #000; }
+        #app { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e1e30 0%, #0a0a12 100%); position: relative; border-left: 1px solid #333; border-right: 1px solid #333; }
 
-        /* Status Bar */
-        .header { padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #111; border-bottom: 2px solid #444; }
-        .stat-box { background: var(--panel); padding: 5px; border-radius: 8px; text-align: center; border: 1px solid #222; }
-        .stat-box small { font-size: 9px; color: #888; display: block; }
-        .stat-box span { font-size: 13px; font-weight: bold; color: #fff; }
+        /* 상단 정보창 */
+        .header { padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: rgba(0,0,0,0.8); border-bottom: 2px solid #333; z-index: 10; }
+        .stat-box { background: var(--panel); padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #444; }
+        .stat-box div { font-size: 0.7rem; color: #aaa; margin-bottom: 2px; }
+        .stat-box span { font-size: 0.9rem; font-weight: bold; }
 
-        /* Main Content */
-        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        /* 메인 컨텐츠 영역 */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
 
-        /* Battle Stage */
-        .battle-area { background: linear-gradient(to bottom, #1a1a2e, #0a0a12); border-radius: 20px; border: 2px solid #444; padding: 20px; text-align: center; margin-bottom: 20px; position: relative; }
-        .monster-display { font-size: 80px; height: 160px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); transition: 0.1s; user-select: none; }
-        
-        .hp-container { height: 25px; background: #222; border-radius: 12.5px; border: 1px solid #555; overflow: hidden; position: relative; margin: 15px 0; }
-        .hp-bar { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: width 0.1s; }
-        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 12px; line-height: 23px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+        /* 전투 UI */
+        .battle-stage { background: var(--panel); border-radius: 25px; border: 2px solid #444; padding: 30px 20px; text-align: center; position: relative; margin-bottom: 25px; transition: 0.1s; }
+        .monster-box { font-size: 6rem; height: 150px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); margin: 10px 0; }
+        .hp-container { height: 20px; background: #222; border-radius: 10px; border: 1px solid #555; overflow: hidden; position: relative; margin: 15px 0; }
+        .hp-bar { height: 100%; background: linear-gradient(90deg, #ff4757, #ff6b81); width: 100%; transition: 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 0.7rem; line-height: 20px; font-weight: bold; text-shadow: 1px 1px 2px black; }
 
-        /* Cards */
-        .card { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 10px; display: flex; align-items: center; margin-bottom: 10px; border-left: 5px solid #555; }
-        .card.MYTHIC { border-left-color: var(--mythic); background: rgba(255, 71, 87, 0.1); }
-        .card.SSR { border-left-color: var(--ssr); }
-        .card-img { width: 50px; height: 50px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 12px; border: 1px solid #444; }
-        .card-info { flex: 1; }
-        .card-info b { font-size: 14px; display: block; }
-        .card-info small { font-size: 11px; color: #aaa; }
+        /* 영웅 & 아이템 카드 */
+        .card { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 12px; display: flex; align-items: center; margin-bottom: 12px; transition: transform 0.1s; }
+        .card:active { transform: scale(0.97); }
+        .hero-icon { width: 55px; height: 55px; border-radius: 12px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-right: 15px; border: 2px solid #444; }
+        .hero-info { flex: 1; }
+        .hero-info b { font-size: 1rem; display: block; }
+        .hero-info small { color: #888; font-size: 0.75rem; }
 
-        /* Nav Bar */
-        .nav { position: absolute; bottom: 0; width: 100%; height: 70px; background: #111; display: flex; border-top: 1px solid #444; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #666; cursor: pointer; }
-        .nav-item.active { color: var(--dia); background: #1a1a2e; }
-        .nav-item i { font-size: 20px; margin-bottom: 3px; font-style: normal; }
+        /* 도감 그리드 */
+        .book-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .book-item { aspect-ratio: 1; background: #111; border-radius: 12px; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; filter: grayscale(1); opacity: 0.2; }
+        .book-item.active { filter: grayscale(0); opacity: 1; border-color: var(--ssr); box-shadow: 0 0 10px rgba(255,165,2,0.3); }
 
-        /* Buttons */
-        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.1s; }
-        .btn:active { transform: scale(0.95); }
-        .btn-hit { width: 100%; padding: 15px; font-size: 20px; background: linear-gradient(to right, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
-        .btn-buy { background: var(--gold); color: #000; padding: 6px 12px; font-size: 11px; }
+        /* 네비게이션 */
+        .nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #05050a; display: flex; border-top: 2px solid #333; padding: 5px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #555; font-size: 0.7rem; font-weight: bold; }
+        .nav-item.active { color: var(--dia); }
+        .nav-item i { font-style: normal; font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* Effects */
-        #toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dia); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; }
-        .damage-pop { position: absolute; color: white; font-weight: bold; font-size: 20px; animation: floatUp 0.5s ease-out forwards; pointer-events: none; }
-        @keyframes floatUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px); } }
-        
+        /* 버튼류 */
+        .btn { border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-hit { width: 100%; padding: 18px; font-size: 1.2rem; background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4); }
+        .btn-buy { background: var(--gold); color: black; padding: 8px 15px; font-size: 0.8rem; }
+        .btn-sm { padding: 5px 10px; font-size: 0.7rem; background: #444; }
+
+        /* 기타 */
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
+        #toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dia); color: black; padding: 12px 25px; border-radius: 25px; font-weight: bold; opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; }
         .hidden { display: none !important; }
-        .overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
+        .shake { animation: shake 0.1s; }
+        @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(3px, 3px); } 75% { transform: translate(-3px, -3px); } }
+        
+        .mythic-border { border-color: var(--mythic) !important; box-shadow: 0 0 15px var(--mythic); }
+        .ssr-border { border-color: var(--ssr) !important; }
     </style>
 </head>
 <body>
 
-<div id="toast"></div>
+<div id="toast">메시지</div>
 
-<div id="login-screen" class="overlay">
-    <div style="font-size: 80px; margin-bottom: 20px;">🎖️</div>
-    <h1 style="margin: 0; color: var(--dia); letter-spacing: 5px;">OVERLORD</h1>
-    <p style="color: #666; font-size: 12px; margin-bottom: 40px;">THE FINAL SAGA REBORN</p>
-    <input type="text" id="join-id" style="width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 10px; text-align: center;" placeholder="NICKNAME">
-    <button class="btn btn-hit" style="margin-top: 20px;" onclick="Engine.start()">START EMPIRE</button>
+<div id="auth-screen" class="overlay">
+    <h1 style="color:var(--dia); font-size: 2.2rem; margin-bottom: 5px;">MYTHIC OVERLORD</h1>
+    <p style="color:#777; font-size: 0.9rem; margin-bottom: 30px;">당신의 영광을 증명하십시오</p>
+    <div style="width: 100%;">
+        <input type="text" id="join-id" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:10px;" placeholder="영주 아이디">
+        <input type="password" id="join-pw" style="width:100%; padding:15px; background:#111; border:1px solid #444; color:white; border-radius:12px; margin-bottom:20px;" placeholder="비밀번호">
+        <button class="btn btn-hit" onclick="handleAuth()">제국 접속</button>
+    </div>
 </div>
 
 <div id="app" class="hidden">
     <header class="header">
-        <div class="stat-box"><small>GOLD</small><span id="txt-gold" style="color:var(--gold)">0</span></div>
-        <div class="stat-box"><small>DIAMOND</small><span id="txt-dia" style="color:var(--dia)">0</span></div>
-        <div class="stat-box"><small>POWER</small><span id="txt-atk" style="color:#00ff88">0</span></div>
+        <div class="stat-box"><div>💰 골드</div><span id="txt-gold" style="color:var(--gold)">0</span></div>
+        <div class="stat-box"><div>💎 다이아</div><span id="txt-dia" style="color:var(--dia)">0</span></div>
+        <div class="stat-box"><div>⚔️ 투력</div><span id="txt-atk" style="color:#00ff88">0</span></div>
     </header>
 
     <div class="main-content">
         <div id="tab-battle">
-            <div class="battle-area" id="battle-screen">
-                <div style="font-size: 12px; color: var(--ssr); margin-bottom: 10px;">STAGE <span id="txt-stage">1</span></div>
-                <div class="monster-display" id="monster-icon">👾</div>
+            <div class="battle-stage" id="stage-box">
+                <div id="king-label" style="display:none; color:var(--gold); font-size:0.7rem; font-weight:bold; margin-bottom:5px;">👑 WORLD CHAMPION AREA</div>
+                <div style="color:var(--ssr); font-weight:bold;">STAGE <span id="txt-stage">1</span></div>
+                <div class="monster-box" id="monster-icon">👾</div>
                 <div class="hp-container">
                     <div id="hp-bar" class="hp-bar"></div>
                     <div id="hp-text" class="hp-text">0 / 0</div>
                 </div>
-                <button class="btn btn-hit" onmousedown="Engine.clickHit()">STRIKE</button>
+                <button class="btn btn-hit" onmousedown="clickAttack()">공격 개시</button>
+                <button id="btn-king" class="btn" style="width:100%; margin-top:10px; height:45px; background:var(--gold); color:black; display:none;" onclick="useKingSkill()">왕의 위엄 (10배 데미지)</button>
             </div>
-            <div id="artis-info" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0;">🏺 활성화된 유물</h4>
+                <small id="txt-arti-info" style="color:#888; font-size:0.65rem;"></small>
+            </div>
+            <div id="list-artis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
         </div>
 
         <div id="tab-draw" class="hidden">
-            <h3 style="text-align:center;">SUMMON HERO</h3>
-            <div id="draw-result" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; min-height:150px; margin-bottom:20px;"></div>
-            <button class="btn btn-hit" onclick="Engine.summon()">10 SUMMON (1,000💎)</button>
+            <h3 style="text-align:center;">🔮 영웅 소환</h3>
+            <div id="draw-result" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; background:rgba(255,255,255,0.03); padding:15px; border-radius:20px; min-height:120px; margin-bottom:20px;"></div>
+            <button class="btn btn-hit" onclick="summonHeroes(10)">10회 소환 (1,000💎)</button>
+            <div style="margin-top:20px; padding:15px; background:var(--panel); border-radius:15px; font-size:0.8rem; color:#aaa;">
+                <p style="margin:5px 0;">• MYTHIC 영웅: 5% 확률</p>
+                <p style="margin:5px 0;">• SSR 영웅: 15% 확률</p>
+                <p style="margin:5px 0;">• 동일 영웅 획득 시 도감 보너스 강화</p>
+            </div>
         </div>
 
         <div id="tab-hero" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0;">MY HEROES (<span id="txt-hcount">0</span>)</h3>
-                <button class="btn btn-buy" onclick="Engine.autoMerge()">AUTO MERGE</button>
+            <div class="card" style="background:rgba(0,210,255,0.05); border:1px dashed var(--dia);">
+                <div class="hero-info">
+                    <b>🔨 전설 제련소 (+<span id="txt-wp">0</span>)</b>
+                    <small>성공률 35% | 실패 시 등급 하락 (보호석으로 방지)</small>
+                </div>
+                <button class="btn btn-buy" onclick="refineWeapon()">제련 (2,000💰)</button>
             </div>
-            <div id="hero-list"></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin:0;">⚔️ 나의 영웅들 (<span id="txt-hero-cnt">0</span>)</h4>
+                <button class="btn btn-sm" onclick="autoEvolve()" style="background:var(--sr); color:black;">일괄 합성</button>
+            </div>
+            <div id="list-heroes"></div>
         </div>
 
-        <div id="tab-rank" class="hidden">
-            <h3 style="text-align:center;">LEADERBOARD</h3>
-            <div id="rank-list" style="margin-bottom:20px;"></div>
-            <div class="card" style="border-left-color:var(--mythic);">
-                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:#fff; padding:10px;" placeholder="Target ID">
-                <button class="btn btn-buy" style="background:var(--mythic); color:#fff;" onclick="Engine.plunder()">PLUNDER</button>
+        <div id="tab-book" class="hidden">
+            <h3 style="text-align:center;">📖 제국 도감</h3>
+            <div style="background:var(--panel); padding:15px; border-radius:15px; text-align:center; margin-bottom:20px;">
+                <div style="font-size:0.8rem; color:#ccc;">현재 수집 보너스</div>
+                <div style="font-size:1.5rem; font-weight:bold; color:var(--dia);" id="txt-book-bonus">+0%</div>
+                <small style="color:#666;">수집된 영웅 한 종류당 영구 공격력 2% 상승</small>
             </div>
+            <div id="grid-book" class="book-grid"></div>
+        </div>
+
+        <div id="tab-social" class="hidden">
+            <h3 style="text-align:center;">🏆 명예의 전당</h3>
+            <div id="list-rank" style="background:var(--panel); border-radius:20px; padding:10px; margin-bottom:25px;"></div>
+            
+            <h3 style="text-align:center;">⚔️ 아이디 약탈</h3>
+            <div class="card">
+                <input type="text" id="target-id" style="flex:1; background:none; border:none; color:white; outline:none;" placeholder="약탈할 유저 ID">
+                <button class="btn btn-buy" style="background:var(--mythic); color:white;" onclick="startPvp()">공격</button>
+            </div>
+            <div id="pvp-log" style="text-align:center; font-size:0.8rem; margin-top:10px;"></div>
         </div>
 
         <div id="tab-shop" class="hidden">
-            <h3 style="text-align:center;">EMPIRE SHOP</h3>
+            <h3 style="text-align:center;">🛒 제국 상점</h3>
             <div class="card">
-                <div class="card-info"><b>Auto Strike (30s)</b><small>Current: <span id="txt-auto">0</span>s</small></div>
-                <button class="btn btn-buy" onclick="Engine.buy('auto')">3,000💰</button>
+                <div class="hero-info"><b>💎 다이아 환전</b><small>8,000💰 ➔ 100💎</small></div>
+                <button class="btn btn-buy" onclick="buyShop('dia')">환전</button>
             </div>
             <div class="card">
-                <div class="card-info"><b>Diamond Box</b><small>10,000 Gold → 100 Dia</small></div>
-                <button class="btn btn-buy" onclick="Engine.buy('dia')">10,000💰</button>
+                <div class="hero-info"><b>🖱️ 오토 클릭</b><small>30초간 자동 공격 (보유: <span id="txt-buff-auto">0</span>초)</small></div>
+                <button class="btn btn-buy" onclick="buyShop('auto')">3,000💰</button>
+            </div>
+            <div class="card">
+                <div class="hero-info"><b>🛡️ 제련 보호석</b><small>실패 시 등급 하락 방지 (보유: <span id="txt-prot">0</span>개)</small></div>
+                <button class="btn btn-buy" onclick="buyShop('prot')">15,000💰</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="Engine.tab('battle', this)"><i>⚔️</i>Battle</div>
-        <div class="nav-item" onclick="Engine.tab('draw', this)"><i>🔮</i>Draw</div>
-        <div class="nav-item" onclick="Engine.tab('hero', this)"><i>🛡️</i>Legion</div>
-        <div class="nav-item" onclick="Engine.tab('rank', this)"><i>🏆</i>Rank</div>
-        <div class="nav-item" onclick="Engine.tab('shop', this)"><i>🛒</i>Shop</div>
+        <div class="nav-item active" onclick="changeTab('battle')"><i>⚔️</i>전투</div>
+        <div class="nav-item" onclick="changeTab('draw')"><i>🔮</i>소환</div>
+        <div class="nav-item" onclick="changeTab('hero')"><i>👤</i>군단</div>
+        <div class="nav-item" onclick="changeTab('book')"><i>📖</i>도감</div>
+        <div class="nav-item" onclick="changeTab('social')"><i>🏆</i>소셜</div>
+        <div class="nav-item" onclick="changeTab('shop')"><i>🛒</i>상점</div>
     </nav>
 </div>
 
 <script>
-/**
- * MYTHIC OVERLORD: THE FINAL ENGINE
- */
-const Engine = (() => {
-    let user = "";
-    let data = { gold: 5000, dia: 2000, stage: 1, inv: [], book: [], artis: {1:0, 2:0, 3:0}, mHp: 2000, maxHp: 2000 };
-    let autoTime = 0;
-
-    const HERO_DB = [];
-    const EMOJIS = ["⚔️", "🛡️", "🏹", "🪄", "🧙", "🧛", "🧞", "🧚", "🧜", "🦄", "🦁", "🐉", "👑", "💎"];
-    for(let i=1; i<=30; i++) {
-        let g = i > 25 ? "MYTHIC" : (i > 15 ? "SSR" : "SR");
-        HERO_DB.push({
-            id: i, name: `${g} Unit #${i}`, grade: g,
-            emoji: EMOJIS[i % EMOJIS.length],
-            atk: i * 300 + (i > 15 ? 10000 : 800)
-        });
+    /* --- 사운드 컨트롤러 (Web Audio API) --- */
+    let audioCtx = null;
+    function playSound(freq, type, dur, vol = 0.1) {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + dur);
+        } catch(e) {}
     }
 
-    const MONSTERS = ["👾", "👹", "💀", "👻", "🐉", "🧟", "🧛", "🕷️", "🦂"];
-
-    const showToast = (m) => {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.style.opacity = 1;
-        setTimeout(() => t.style.opacity = 0, 1500);
+    /* --- 게임 데이터 --- */
+    let user = "";
+    let data = {
+        gold: 0, dia: 3000, stage: 1, wp: 0, prot: 0,
+        inv: [], book: [], artis: { 1:0, 2:0, 3:0 },
+        mHp: 2000, maxHp: 2000
     };
+    let buffs = { auto: 0, king: 0 };
 
-    const getAtk = () => {
-        let base = data.inv.reduce((s, h) => s + (h.atk * h.star), 0);
-        let bonus = 1 + (data.book.length * 0.05) + (data.artis[1] * 0.5);
-        return (base + 100) * bonus;
-    };
+    const HERO_LIST = [];
+    const ICONS = { SR: ["🏹", "🛡️", "🗡️", "⚔️"], SSR: ["🧙", "🔱", "🐲", "✨"], MYTHIC: ["👑", "💎", "☄️", "🌑"] };
+    for(let i=1; i<=40; i++) {
+        let g = i > 35 ? "MYTHIC" : (i > 20 ? "SSR" : "SR");
+        HERO_LIST.push({ id: i, name: `영웅 No.${i}`, grade: g, img: ICONS[g][i % 4], atk: i * 150 + (i > 20 ? 5000 : 500), price: 1000 + (i * 200) });
+    }
 
-    const save = () => {
+    /* --- 시스템 로직 --- */
+    function handleAuth() {
+        const id = document.getElementById('join-id').value.trim();
+        const pw = document.getElementById('join-pw').value.trim();
+        if(!id || !pw) return alert("입력 정보가 부족합니다.");
+
+        // 오디오 컨텍스트 활성화 (브라우저 정책 대응)
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const db = JSON.parse(localStorage.getItem('mythic_v3_db') || "{}");
+        if(db[id]) {
+            if(db[id].pw !== pw) return alert("비밀번호가 다릅니다.");
+            data = {...data, ...db[id].data};
+        } else {
+            db[id] = { pw: pw, data: data };
+            localStorage.setItem('mythic_v3_db', JSON.stringify(db));
+        }
+        user = id;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        
+        updateUI();
+        updateMonster();
+        startLoops();
+    }
+
+    function saveGame() {
         if(!user) return;
-        const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
-        all[user] = data;
-        localStorage.setItem('mo_final_db', JSON.stringify(all));
-    };
+        const db = JSON.parse(localStorage.getItem('mythic_v3_db') || "{}");
+        db[user].data = data;
+        localStorage.setItem('mythic_v3_db', JSON.stringify(db));
+    }
 
-    const updateUI = () => {
+    function getAtk() {
+        let baseAtk = data.inv.reduce((sum, h) => sum + (h.atk * h.star), 0);
+        let bookMul = 1 + (data.book.length * 0.02);
+        let artiMul = 1 + (data.artis[1] * 0.4);
+        let finalAtk = (baseAtk + (data.wp * 1500) + 100) * bookMul * artiMul;
+        return buffs.king > 0 ? finalAtk * 10 : finalAtk;
+    }
+
+    function clickAttack() {
+        playSound(200, 'sine', 0.1, 0.2);
+        const box = document.getElementById('stage-box');
+        box.classList.add('shake');
+        setTimeout(() => box.classList.remove('shake'), 100);
+        doDamage(getAtk());
+    }
+
+    function doDamage(dmg) {
+        data.mHp -= dmg;
+        if(data.mHp <= 0) {
+            playSound(500, 'triangle', 0.2);
+            let goldMul = 1 + (data.artis[2] * 0.7);
+            data.gold += Math.floor((1000 + (data.stage * 400)) * goldMul);
+            
+            if(Math.random() < (0.2 + data.artis[3] * 0.1)) {
+                data.dia += 50;
+                showToast("💎 다이아 획득!");
+            }
+
+            if(data.stage % 10 === 0) {
+                let r = Math.floor(Math.random() * 3) + 1;
+                data.artis[r]++;
+                showToast(`🏺 유물 공명! Lv.${data.artis[r]}`);
+            }
+
+            data.stage++;
+            data.maxHp = Math.floor(2000 * Math.pow(1.35, data.stage - 1));
+            data.mHp = data.maxHp;
+            updateMonster();
+        }
+        updateUI();
+    }
+
+    function startLoops() {
+        setInterval(() => {
+            doDamage(getAtk() / 10);
+            if(buffs.auto > 0) { doDamage(getAtk() / 3); buffs.auto = Math.max(0, buffs.auto - 0.1); }
+            if(buffs.king > 0) buffs.king = Math.max(0, buffs.king - 0.1);
+            if(data.stage % 1 === 0) saveGame(); 
+        }, 100);
+    }
+
+    /* --- 탭 기능 --- */
+    function changeTab(tab) {
+        document.querySelectorAll('.main-content > div').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + tab).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        if(tab === 'hero') renderHeroes();
+        if(tab === 'book') renderBook();
+        if(tab === 'social') renderRank();
+        if(tab === 'battle') renderArtis();
+        updateUI();
+    }
+
+    /* --- 세부 기능 --- */
+    function summonHeroes(n) {
+        if(data.dia < 1000) return showToast("다이아 부족!");
+        data.dia -= 1000;
+        playSound(800, 'sine', 0.5);
+        const area = document.getElementById('draw-result');
+        area.innerHTML = '';
+        for(let i=0; i<n; i++) {
+            let pick = HERO_LIST[Math.floor(Math.random() * HERO_LIST.length)];
+            data.inv.push({...pick, uid: Date.now() + Math.random(), star: 1});
+            if(!data.book.includes(pick.id)) data.book.push(pick.id);
+            area.innerHTML += `<div style="font-size:2rem; text-align:center;">${pick.img}</div>`;
+        }
+        updateUI();
+    }
+
+    function renderHeroes() {
+        const list = document.getElementById('list-heroes');
+        list.innerHTML = '';
+        data.inv.sort((a,b) => b.atk * b.star - a.atk * a.star).forEach(h => {
+            list.innerHTML += `
+                <div class="card ${h.grade === 'MYTHIC' ? 'mythic-border' : (h.grade === 'SSR' ? 'ssr-border' : '')}">
+                    <div class="hero-icon">${h.img}</div>
+                    <div class="hero-info">
+                        <b style="color:var(--${h.grade.toLowerCase()})">${h.name} [★${h.star}]</b>
+                        <small>전투력: ${Math.floor(h.atk * h.star).toLocaleString()}</small>
+                    </div>
+                    <button class="btn btn-sm" onclick="sellHero(${h.uid})">판매</button>
+                </div>`;
+        });
+        document.getElementById('txt-hero-cnt').innerText = data.inv.length;
+        document.getElementById('txt-wp').innerText = data.wp;
+        document.getElementById('txt-prot').innerText = data.prot;
+    }
+
+    function sellHero(uid) {
+        const idx = data.inv.findIndex(h => h.uid === uid);
+        const h = data.inv[idx];
+        data.gold += h.price;
+        if(h.grade === 'SSR') data.dia += 80;
+        if(h.grade === 'MYTHIC') data.dia += 300;
+        data.inv.splice(idx, 1);
+        renderHeroes();
+        updateUI();
+    }
+
+    function autoEvolve() {
+        let map = {};
+        data.inv.forEach(h => { if(!map[h.id]) map[h.id] = []; map[h.id].push(h); });
+        let count = 0;
+        for(let id in map) {
+            while(map[id].length >= 2) {
+                let h1 = map[id].pop();
+                let h2 = map[id].pop();
+                h1.star++;
+                h1.atk *= 2.2;
+                data.inv = data.inv.filter(x => x.uid !== h2.uid);
+                count++;
+            }
+        }
+        if(count > 0) { showToast(`${count}회 합성 완료!`); playSound(600, 'triangle', 0.3); renderHeroes(); updateUI(); }
+        else showToast("합성할 영웅이 없습니다.");
+    }
+
+    function refineWeapon() {
+        if(data.gold < 2000) return showToast("골드 부족!");
+        data.gold -= 2000;
+        if(Math.random() < 0.35) {
+            data.wp++;
+            playSound(1000, 'sine', 0.2);
+            showToast("🔨 제련 성공!");
+        } else {
+            if(data.prot > 0) { data.prot--; showToast("🛡️ 보호석으로 하락 방지!"); }
+            else { data.wp = Math.max(0, data.wp - 1); showToast("💨 제련 실패..."); }
+        }
+        renderHeroes();
+        updateUI();
+    }
+
+    function renderBook() {
+        const grid = document.getElementById('grid-book');
+        grid.innerHTML = '';
+        HERO_LIST.forEach(h => {
+            const active = data.book.includes(h.id);
+            grid.innerHTML += `<div class="book-item ${active?'active':''}">${h.img}</div>`;
+        });
+        document.getElementById('txt-book-bonus').innerText = `+${data.book.length * 2}%`;
+    }
+
+    function renderRank() {
+        const db = JSON.parse(localStorage.getItem('mythic_v3_db') || "{}");
+        let ranks = Object.keys(db).map(id => ({ id, stage: db[id].data.stage }));
+        ranks.sort((a,b) => b.stage - a.stage);
+        
+        const list = document.getElementById('list-rank');
+        list.innerHTML = ranks.slice(0, 10).map((u, i) => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; ${u.id===user?'color:var(--dia)':''}">
+                <span>${i===0?'👑':i+1+'.'} <b>${u.id}</b></span>
+                <span>Stage ${u.stage}</span>
+            </div>`).join('');
+        
+        const isKing = ranks.length > 0 && ranks[0].id === user;
+        document.getElementById('king-label').style.display = isKing ? 'block' : 'none';
+        document.getElementById('btn-king').style.display = isKing ? 'block' : 'none';
+    }
+
+    function startPvp() {
+        const target = document.getElementById('target-id').value.trim();
+        const db = JSON.parse(localStorage.getItem('mythic_v3_db') || "{}");
+        if(!db[target] || target === user) return showToast("대상 불가");
+        
+        let myAtk = getAtk();
+        let opAtk = db[target].data.stage * 10000; // 간략 수치
+
+        if(myAtk > opAtk) {
+            let steal = Math.floor(db[target].data.gold * 0.15);
+            data.gold += steal;
+            db[target].data.gold -= steal;
+            localStorage.setItem('mythic_v3_db', JSON.stringify(db));
+            document.getElementById('pvp-log').innerText = `⚔️ 승리! ${steal.toLocaleString()}골드 약탈`;
+            document.getElementById('pvp-log').style.color = "var(--dia)";
+        } else {
+            document.getElementById('pvp-log').innerText = `💀 패배... 도망쳤습니다.`;
+            document.getElementById('pvp-log').style.color = "var(--mythic)";
+        }
+        updateUI();
+    }
+
+    function buyShop(type) {
+        if(type === 'dia' && data.gold >= 8000) { data.gold -= 8000; data.dia += 100; showToast("환전 완료"); }
+        else if(type === 'auto' && data.gold >= 3000) { data.gold -= 3000; buffs.auto += 30; showToast("오토 30초 추가"); }
+        else if(type === 'prot' && data.gold >= 15000) { data.gold -= 15000; data.prot++; showToast("보호석 획득"); }
+        else showToast("골드 부족");
+        updateUI();
+    }
+
+    function renderArtis() {
+        const area = document.getElementById('list-artis');
+        area.innerHTML = '';
+        [1,2,3].forEach(i => {
+            area.innerHTML += `
+                <div style="background:#111; padding:10px; border-radius:12px; text-align:center; border:1px solid #333;">
+                    <div style="font-size:1.5rem;">${["", "🗡️", "🏆", "🔑"][i]}</div>
+                    <b style="color:var(--ssr);">Lv.${data.artis[i]}</b>
+                </div>`;
+        });
+        document.getElementById('txt-arti-info').innerText = `공격 +${data.artis[1]*40}% / 골드 +${data.artis[2]*70}%`;
+    }
+
+    function useKingSkill() { buffs.king = 10; showToast("👑 왕의 위엄! 데미지 10배!"); }
+    function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 1500); }
+    function updateMonster() { document.getElementById('monster-icon').innerText = ["👾", "🐉", "🧟", "🧛", "👹", "🦇", "🐙"][data.stage % 7]; }
+    function updateUI() {
         document.getElementById('txt-gold').innerText = Math.floor(data.gold).toLocaleString();
         document.getElementById('txt-dia').innerText = Math.floor(data.dia).toLocaleString();
         document.getElementById('txt-atk').innerText = Math.floor(getAtk()).toLocaleString();
         document.getElementById('txt-stage').innerText = data.stage;
-        document.getElementById('txt-auto').innerText = autoTime;
+        document.getElementById('txt-buff-auto').innerText = Math.ceil(buffs.auto);
         
-        const hpPer = Math.max(0, (data.mHp / data.maxHp) * 100);
+        const hpPer = (data.mHp / data.maxHp) * 100;
         document.getElementById('hp-bar').style.width = hpPer + "%";
         document.getElementById('hp-text').innerText = `${Math.floor(data.mHp).toLocaleString()} / ${data.maxHp.toLocaleString()}`;
-        
-        const artGrid = document.getElementById('artis-info');
-        artGrid.innerHTML = '';
-        [1,2,3].forEach(i => artGrid.innerHTML += `<div class="stat-box"><small>ARTIFACT</small>Lv.${data.artis[i]}</div>`);
-        save();
-    };
-
-    return {
-        start: () => {
-            const id = document.getElementById('join-id').value.trim();
-            if(!id) return alert("ENTER NICKNAME");
-            user = id;
-            const saved = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
-            if(saved[id]) data = saved[id];
-            
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            
-            updateUI();
-            setInterval(() => {
-                if(autoTime > 0) { Engine.doDamage(getAtk() * 0.5); autoTime--; }
-                Engine.doDamage(getAtk() * 0.05, true);
-                updateUI();
-            }, 1000);
-        },
-
-        clickHit: () => {
-            Engine.doDamage(getAtk());
-            const m = document.getElementById('monster-icon');
-            m.style.transform = "scale(0.8) translateY(10px)";
-            setTimeout(() => m.style.transform = "scale(1)", 50);
-            
-            const pop = document.createElement('div');
-            pop.className = 'damage-pop';
-            pop.innerText = `-${Math.floor(getAtk()).toLocaleString()}`;
-            pop.style.left = (Math.random()*40+30) + "%";
-            pop.style.top = "40%";
-            document.getElementById('battle-screen').appendChild(pop);
-            setTimeout(() => pop.remove(), 500);
-        },
-
-        doDamage: (dmg, isPassive) => {
-            data.mHp -= dmg;
-            if(data.mHp <= 0) {
-                data.gold += (500 * data.stage) * (1 + data.artis[2]);
-                if(Math.random() < 0.1) {
-                    data.artis[Math.floor(Math.random()*3)+1]++;
-                    showToast("🏺 Artifact Resonance!");
-                }
-                data.stage++;
-                data.maxHp = Math.floor(2000 * Math.pow(1.25, data.stage));
-                data.mHp = data.maxHp;
-                document.getElementById('monster-icon').innerText = MONSTERS[data.stage % MONSTERS.length];
-                showToast("STAGE CLEAR!");
-            }
-            if(!isPassive) updateUI();
-        },
-
-        summon: () => {
-            if(data.dia < 1000) return showToast("No Diamond!");
-            data.dia -= 1000;
-            const res = document.getElementById('draw-result');
-            res.innerHTML = '';
-            for(let i=0; i<10; i++) {
-                const pick = HERO_DB[Math.floor(Math.random() * HERO_DB.length)];
-                data.inv.push({...pick, uid: Date.now() + Math.random(), star: 1});
-                if(!data.book.includes(pick.id)) data.book.push(pick.id);
-                res.innerHTML += `<div class="card-img">${pick.emoji}</div>`;
-            }
-            updateUI();
-        },
-
-        autoMerge: () => {
-            let evolved = false;
-            let groups = {};
-            data.inv.forEach(h => { if(!groups[h.id]) groups[h.id] = []; groups[h.id].push(h); });
-            for(let id in groups) {
-                while(groups[id].length >= 2) {
-                    const h1 = groups[id].pop(); const h2 = groups[id].pop();
-                    h1.star++;
-                    data.inv = data.inv.filter(x => x.uid !== h2.uid);
-                    evolved = true;
-                }
-            }
-            if(evolved) { showToast("Evolved!"); Engine.renderHero(); updateUI(); }
-        },
-
-        plunder: () => {
-            const target = document.getElementById('target-id').value.trim();
-            const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
-            if(!all[target] || target === user) return showToast("Invalid Target");
-            
-            if(getAtk() > (all[target].stage * 15000)) {
-                const steal = Math.floor(all[target].gold * 0.1);
-                data.gold += steal;
-                all[target].gold -= steal;
-                localStorage.setItem('mo_final_db', JSON.stringify(all));
-                showToast(`Success! Stole ${steal} Gold`);
-            } else {
-                showToast("Defeat! Too strong.");
-            }
-            updateUI();
-        },
-
-        renderHero: () => {
-            const list = document.getElementById('hero-list');
-            list.innerHTML = '';
-            data.inv.sort((a,b) => (b.atk*b.star)-(a.atk*a.star)).forEach(h => {
-                list.innerHTML += `<div class="card ${h.grade}"><div class="card-img">${h.emoji}</div><div class="card-info"><b>${h.name} ★${h.star}</b><small>Power: ${Math.floor(h.atk*h.star).toLocaleString()}</small></div></div>`;
-            });
-            document.getElementById('txt-hcount').innerText = data.inv.length;
-        },
-
-        renderRank: () => {
-            const all = JSON.parse(localStorage.getItem('mo_final_db') || "{}");
-            const sorted = Object.keys(all).map(k => ({id:k, s:all[k].stage})).sort((a,b)=>b.s-a.s);
-            document.getElementById('rank-list').innerHTML = sorted.slice(0,5).map((u,i)=>`<div class="stat-box" style="text-align:left; margin-bottom:5px; padding:10px;">${i+1}. <b>${u.id}</b> - Stage ${u.s}</div>`).join('');
-        },
-
-        buy: (type) => {
-            if(type === 'auto' && data.gold >= 3000) { data.gold -= 3000; autoTime += 30; }
-            else if(type === 'dia' && data.gold >= 10000) { data.gold -= 10000; data.dia += 100; }
-            else return showToast("Lack of Gold");
-            updateUI();
-        },
-
-        tab: (name, el) => {
-            document.querySelectorAll('.main-content > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`tab-${name}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            if(name === 'hero') Engine.renderHero();
-            if(name === 'rank') Engine.renderRank();
-        }
-    };
-})();
+    }
 </script>
 </body>
 </html>
